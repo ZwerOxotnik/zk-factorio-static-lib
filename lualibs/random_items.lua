@@ -37,6 +37,13 @@ local function check_items()
 	random_items = global.random_items
 end
 
+module.insert_random_item = function(receiver, count)
+	if count == nil then count = 1 end
+	for i=1, count do
+		receiver.insert{name = random_items[math.random(#random_items)]}
+	end
+end
+
 module.on_init = function()
 	check_global_data()
 	check_items()
