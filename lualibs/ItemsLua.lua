@@ -21,15 +21,17 @@ local module = {}
 
 -- the items must have count
 module.transfer_items = function(source, items, destination)
+    local items_amount = items.count or items.amount
     local count = source.get_item_count(items.name)
-    if items.count > count then
-        if count == 0 then return false end
-        items.count = count
+    if items_amount > count then
+        if count == 0 then return 0 end
+        if items.count then items.count = count end
+        if items.amount then items.amount = count end
     end
     if not destination.can_insert(items) then return 0 end
-    local inserted_items = destination.insert(items)
+    local inserted_items_count = destination.insert(items)
     source.remove_item(items)
-    return insterted_items
+    return inserted_items_count
 end
 
 return module
