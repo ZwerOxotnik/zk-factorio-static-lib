@@ -1,5 +1,5 @@
 --[[
-Copyright 2019-2020 ZwerOxotnik <zweroxotnik@gmail.com>
+Copyright 2019-2021 ZwerOxotnik <zweroxotnik@gmail.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,28 +19,61 @@ limitations under the License.
 
 local module = {}
 local random_items
+local random = math.random
+local tinsert = table.insert
+local BLACKLISTED_NAMES = {
+	["artillery-targeting-remote"] = true
+}
+local BLACKLISTED_TYPES = {
+	["deconstruction-item"] = true,
+	["spidertron-remote"] = true,
+	["copy-paste-tool"] = true,
+	["selection-tool"] = true,
+	["blueprint-book"] = true,
+	["upgrade-item"] = true,
+	["rail-planner"] = true,
+	["mining-tool"] = true,
+	["blueprint"] = true,
+	["item-with-inventory"] = true, -- perhaps, I shouldn't do that
+	["item-with-label"] = true,
+	["item-with-tags"] = true,
+	["tool"] = true -- it seems almost fine in general
+}
 
 local function check_global_data()
 	global.random_items = global.random_items or {}
 end
 
--- Finds all items, clearing cheat items, broken items to save rest names of items in global.random_items
+-- Finds most player items and save their names into global.random_items
 local function check_items()
 	global.random_items = {}
+	random_items = global.random_items
 	for name, item in pairs(game.item_prototypes) do
-		if not (name:find("creative") or name:find("hidden") or name:find("infinity")
-			or name:find("infinity") or name:find("cheat"))and item.type ~= "mining-tool"
-			and not item.has_flag("hidden") then
-			table.insert(global.random_items, name)
+		if not (
+				BLACKLISTED_TYPES[item.type] or BLACKLISTED_NAMES[name]
+				or name:find("creative") or name:find("hidden")
+				or name:find("infinity") or name:find("cheat")
+			)
+			and not item.has_flag("hidden")
+		then
+				tinsert(random_items, name)
 		end
 	end
-	random_items = global.random_items
 end
 
+---@param receiver LuaEntity
+---@param count? number
 module.insert_random_item = function(receiver, count)
-	if count == nil then count = 1 end
-	for i=1, count do
-		receiver.insert{name = random_items[math.random(#random_items)]}
+	if count == nil then
+		receiver.insert{name = random_items[random(#random_items)]}
+		return
+	end
+
+	local data = {name = ''}
+	local insert = receiver.insert
+	for _=1, count do
+		data.name = random_items[random(#random_items)]
+		insert(data)
 	end
 end
 
