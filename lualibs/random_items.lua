@@ -20,25 +20,6 @@ limitations under the License.
 local module = {}
 local random_items
 local random = math.random
-local tinsert = table.insert
-local BLACKLISTED_NAMES = {
-	["artillery-targeting-remote"] = true
-}
-local BLACKLISTED_TYPES = {
-	["deconstruction-item"] = true,
-	["spidertron-remote"] = true,
-	["copy-paste-tool"] = true,
-	["selection-tool"] = true,
-	["blueprint-book"] = true,
-	["upgrade-item"] = true,
-	["rail-planner"] = true,
-	["mining-tool"] = true,
-	["blueprint"] = true,
-	["item-with-inventory"] = true, -- perhaps, I shouldn't do that
-	["item-with-label"] = true,
-	["item-with-tags"] = true,
-	["tool"] = true -- it seems almost fine in general
-}
 
 local function check_global_data()
 	global.random_items = global.random_items or {}
@@ -46,17 +27,41 @@ end
 
 -- Finds most player items and save their names into global.random_items
 local function check_items()
+	local BLACKLISTED_NAMES = {
+		["artillery-targeting-remote"] = true
+	}
+	local BLACKLISTED_TYPES = {
+		["deconstruction-item"] = true,
+		["spidertron-remote"] = true,
+		["copy-paste-tool"] = true,
+		["selection-tool"] = true,
+		["blueprint-book"] = true,
+		["upgrade-item"] = true,
+		["rail-planner"] = true,
+		["mining-tool"] = true,
+		["blueprint"] = true,
+		["item-with-inventory"] = true, -- perhaps, I shouldn't do that
+		["item-with-label"] = true,
+		["item-with-tags"] = true,
+		["tool"] = true -- it seems almost fine in general
+	}
 	global.random_items = {}
 	random_items = global.random_items
 	for name, item in pairs(game.item_prototypes) do
 		if not (
-				BLACKLISTED_TYPES[item.type] or BLACKLISTED_NAMES[name]
-				or name:find("creative") or name:find("hidden")
-				or name:find("infinity") or name:find("cheat")
+				item.has_flag("hidden")
+				or BLACKLISTED_TYPES[item.type]
+				or BLACKLISTED_NAMES[name]
+				or name:find("creative") -- for https://mods.factorio.com/mod/creative-mode etc
+				or name:find("hidden")
+				or name:find("infinity")
+				or name:find("cheat")
+				or name:find("[xX]%d+_") -- for https://mods.factorio.com/mod/X100_assembler etc
+				or name:find("^osp_") -- for mods.factorio.com/mod/m-spell-pack
+				or name:find("^ee-") -- for https://mods.factorio.com/mod/EditorExtensions
 			)
-			and not item.has_flag("hidden")
 		then
-				tinsert(random_items, name)
+			random_items[#random_items+1] = name
 		end
 	end
 end
