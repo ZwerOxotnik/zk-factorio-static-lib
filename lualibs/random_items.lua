@@ -58,7 +58,7 @@ local function check_items()
 				or name:find("cheat")
 				or name:find("[xX]%d+_") -- for https://mods.factorio.com/mod/X100_assembler etc
 				or name:find("^osp_") -- for mods.factorio.com/mod/m-spell-pack
-				or name:find("^ee-") -- for https://mods.factorio.com/mod/EditorExtensions
+				or name:find("^ee%-") -- for https://mods.factorio.com/mod/EditorExtensions
 			)
 		then
 			random_items[#random_items+1] = name
