@@ -85,10 +85,11 @@ end
 ---@vararg table
 ---@return table
 M.merge_locales = function(...)
+  local args = {...}
   local new_locale = {''}
 
-  for i=1, #arg do
-    tinsert(new_locale, arg[i])
+  for i=1, #args do
+    new_locale[i+1] = args[i]
   end
 
   return new_locale
@@ -98,10 +99,11 @@ end
 ---@vararg table
 ---@return table
 M.merge_locales_as_new = function(...)
+  local args = {...}
   local new_locale = {''}
 
-  for i=1, #arg do
-    tinsert(new_locale, deepcopy(arg[i]))
+  for i=1, #args do
+    new_locale[i+1] = deepcopy(args[i])
   end
 
   return new_locale
