@@ -9,18 +9,15 @@ local tinsert = table.insert
 ---@param array table
 ---@return table?
 M.array_to_locale = function(array)
-	local final_data
-	if #array >= 380 then
-		log("Too much data")
-		return
-	elseif #array <= 10 then
-		final_data = array
+	local locale
+	if #array <= 10 then
+		locale = array
 	else
-		final_data = {{''}}
+		locale = {{''}}
 		local i = 1
 		local j = 2
 		for _, _data in pairs(array) do
-			local row = final_data[i]
+			local row = locale[i]
 			if type(_data) == "string" then
 				if j > 2 then
 					local prev_data = row[j-1]
@@ -32,8 +29,12 @@ M.array_to_locale = function(array)
 			end
 			row[j] = _data
 			if j >= 20 then
+				if i >= 20 then
+					log("Too much data")
+					return
+				end
 				i = i + 1
-				final_data[i] = {''}
+				locale[i] = {''}
 				j = 2
 			else
 				j = j + 1
@@ -42,19 +43,15 @@ M.array_to_locale = function(array)
 		end
 	end
 
-	if type(final_data[1]) == "string" then
-		if final_data[1] ~= '' then
-			tinsert(final_data, 1, '')
+	if type(locale[1]) == "string" then
+		if locale[1] ~= '' then
+			tinsert(locale, 1, '')
 		end
 	else
-		tinsert(final_data, 1, '')
-	end
-	if #final_data > 20 then
-		log("Too much data")
-		return
+		tinsert(locale, 1, '')
 	end
 
-	return final_data
+	return locale
 end
 
 
@@ -141,7 +138,5 @@ M.merge_locales_as_new = function(...)
 	return deepcopy(M.merge_locales(...))
 end
 
-local t2 = M.merge_locales({'', nil, "tsef", {"test", 3, 2, 4}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}},{'', nil, "tsef", {"test"}, {'', "test", {'', "test"}}}, nil, {{"fesfes"}, nil, nil, 44})
-g = 4
 
 return M
