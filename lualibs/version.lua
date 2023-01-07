@@ -1,4 +1,5 @@
 -- Works for any stage
+---@class ZWversion
 local M = {}
 
 

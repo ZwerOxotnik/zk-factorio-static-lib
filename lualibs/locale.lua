@@ -1,3 +1,4 @@
+---@class ZWlocale
 local M = {}
 
 
