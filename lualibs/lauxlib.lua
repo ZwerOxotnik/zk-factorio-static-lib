@@ -2,6 +2,9 @@
 local lauxlib = {}
 
 
+local getinfo = debug.getinfo
+
+
 ---Got some help from JanSharp (https://github.com/JanSharp/phobos/issues/4)
 
 
@@ -12,22 +15,22 @@ lauxlib.count_levels = function()
 	local li = 16
 	local le = 15
 	-- find bounds
-	if not debug.getinfo(16, "t") then
+	if not getinfo(16, "") then
 		repeat
 			le = li
 			li = li / 2
-		until debug.getinfo(li, "t")
+		until getinfo(li, "")
 	else
 		repeat
 			li = le
 			le = le + le
-		until not debug.getinfo(le, "t")
+		until not getinfo(le, "")
 	end
 
 	-- do a binary search
 	while li < le do
 		local m = math.floor((li + le) / 2)
-		if debug.getinfo(m, "t") then
+		if getinfo(m, "") then
 			li = m + 1
 		else
 			le = m
@@ -48,29 +51,29 @@ lauxlib.get_first_lua_func_info = function(what)
 	local li = 16
 	local le = 15
 	-- find bounds
-	if not debug.getinfo(16, "t") then
+	if not getinfo(16, "") then
 		repeat
 			le = li
 			li = li / 2
-		until debug.getinfo(li, "t")
+		until getinfo(li, "")
 	else
 		repeat
 			li = le
 			le = le + le
-		until not debug.getinfo(le, "t")
+		until not getinfo(le, "")
 	end
 
 	-- do a binary search
 	while li < le do
 		local m = math.floor((li + le) / 2)
-		if debug.getinfo(m, "t") then
+		if getinfo(m, "") then
 			li = m + 1
 		else
 			le = m
 		end
 	end
 
-	return debug.getinfo(le - 1, what)
+	return getinfo(le - 1, what)
 end
 
 
