@@ -12,6 +12,8 @@ market_util.validation_rules = {
 		return (game.recipe_prototypes[offer.item] ~= nil)
 	end
 }
+
+
 ---@param target LuaEntity
 ---@param offers Offer[]
 ---@return integer # amount of added offers
@@ -42,6 +44,30 @@ market_util.add_offers_safely = function(target, offers)
 	end
 
 	return added_amount
+end
+
+
+---@param target LuaEntity
+---@param offer_data Offer
+---@return boolean # is added
+market_util.add_offer_safely = function(target, offer_data)
+	local item_prototypes = game.item_prototypes
+	local prices = offer_data.price
+	for j=1, #prices do
+		local price_data = prices[j]
+		if item_prototypes[price_data[1] or price_data.name] == nil then
+			return false
+		end
+	end
+
+	local offer = offer_data.offer
+	local rule = market_util.validation_rules[offer.type]
+	if rule and rule(offer) ~= true then
+		return false
+	end
+
+	target.add_market_item(offer_data)
+	return true
 end
 
 
