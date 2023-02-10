@@ -1,8 +1,8 @@
 ---@class ZKMarket
-local market = {}
+local market_util = {}
 
 
-market.validation_rules = {
+market_util.validation_rules = {
 	---@param offer TechnologyModifier
 	["give-item"] = function(offer)
 		return (game.item_prototypes[offer.item] ~= nil)
@@ -15,8 +15,8 @@ market.validation_rules = {
 ---@param target LuaEntity
 ---@param offers Offer[]
 ---@return integer # amount of added offers
-market.add_offers_safely = function(target, offers)
-	local validation_rules = market.validation_rules
+market_util.add_offers_safely = function(target, offers)
+	local validation_rules = market_util.validation_rules
 	local item_prototypes = game.item_prototypes
 	local add_market_item = target.add_market_item
 	local added_amount = 0
@@ -24,8 +24,8 @@ market.add_offers_safely = function(target, offers)
 		local offer_data = offers[i]
 		local prices = offer_data.price
 		for j=1, #prices do
-			local price = prices[j]
-			if item_prototypes[price.name] == nil then
+			local price_data = prices[j]
+			if item_prototypes[price_data[1] or price_data.name] == nil then
 				goto skip
 			end
 		end
@@ -48,7 +48,7 @@ end
 ---Please, use add_offers_safely(target, offers) instead
 ---@param target LuaEntity
 ---@param offers Offer[]
-market.add_offers = function(target, offers)
+market_util.add_offers = function(target, offers)
 	local add_market_item = target.add_market_item
 	for i = 1, #offers do
 		local offer_data = offers[i]
@@ -57,4 +57,4 @@ market.add_offers = function(target, offers)
 end
 
 
-return market
+return market_util
