@@ -10,6 +10,18 @@ market_util.validation_rules = {
 	---@param offer TechnologyModifier
 	["unlock-recipe"] = function(offer)
 		return (game.recipe_prototypes[offer.item] ~= nil)
+	end,
+	---@param offer TechnologyModifier
+	["gun-speed"] = function(offer)
+		return (game.ammo_category_prototypes[offer.ammo_category] ~= nil)
+	end,
+	---@param offer TechnologyModifier
+	["ammo-damage"] = function(offer)
+		return (game.ammo_category_prototypes[offer.ammo_category] ~= nil)
+	end,
+	---@param offer TechnologyModifier
+	["turret-attack"] = function(offer)
+		return (game.entity_prototypes[offer.turret_id] ~= nil)
 	end
 }
 
