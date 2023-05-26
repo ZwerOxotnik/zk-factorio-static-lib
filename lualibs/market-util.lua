@@ -1,4 +1,4 @@
----@class ZKMarket
+---@class ZOMarket
 local market_util = {}
 
 
