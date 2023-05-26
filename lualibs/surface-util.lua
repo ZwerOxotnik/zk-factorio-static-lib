@@ -1,25 +1,27 @@
----@class ZWsurface
+---@class ZOsurface
 local M = {}
 
 
-local source_left_top = {x = 0, y = 0}
-local source_right_bottom = {x = 0, y = 0}
-local destination_left_top = {x = 0, y = 0}
-local destination_right_bottom = {x = 0, y = 0}
-local clone_data = {
+local tile_source_left_top = {x = 0, y = 0}
+local tile_source_right_bottom = {x = 0, y = 0}
+local tile_destination_left_top = {x = 0, y = 0}
+local tile_destination_right_bottom = {x = 0, y = 0}
+local clone_tile_data = {
 	source_area = {
-		left_top = source_left_top,
-		right_bottom = source_right_bottom
+		left_top = tile_source_left_top,
+		right_bottom = tile_source_right_bottom
 	},
 	destination_area = {
-		left_top = destination_left_top,
-		right_bottom = destination_right_bottom
+		left_top = tile_destination_left_top,
+		right_bottom = tile_destination_right_bottom
 	},
 	destination_force="neutral", clone_tiles=true, clone_entities=false,
 	clone_decoratives=false, clear_destination_entities=false,
 	clear_destination_decoratives=false, expand_map=false,
 	create_build_effect_smoke=false
 }
+local resource_position = {0, 0}
+local resource_data = {name="", amount=4294967295, snap_to_tile_center=true, position=resource_position}
 
 
 -- Initital x, y for left bottom corner which creates tiles to right top corner
@@ -33,9 +35,10 @@ M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
 	local tiles = {
 		{position = {x, y}, name = tile_name}
 	}
-	if size == 2 then
+	if size >= 2 then
 		tiles[2] = {position = {x, y - 1}, name = tile_name}
-	elseif size == 3 then
+	end
+	if size == 3 then
 		tiles[3] = {position = {x, y - 2}, name = tile_name}
 	end
 	surface.set_tiles(tiles, true, false, false)
@@ -43,51 +46,150 @@ M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
 
 	if size >= 4 then
 		local step = 2
-		source_left_top.x = x
-		source_right_bottom.y = y
-		source_right_bottom.x = x + 1
-		destination_left_top.x = x
-		destination_right_bottom.x = x + 1
+		tile_source_left_top.x = x
+		tile_source_right_bottom.y = y
+		tile_source_right_bottom.x = x + 1
+		tile_destination_left_top.x = x
+		tile_destination_right_bottom.x = x + 1
 		local max_step = size / 2
 		while step <= max_step do
-			source_left_top.y = y - step
-			destination_left_top.y = y - step * 2
-			destination_right_bottom.y = y - step
-			surface.clone_area(clone_data)
+			tile_source_left_top.y = y - step
+			tile_destination_left_top.y = y - step * 2
+			tile_destination_right_bottom.y = y - step
+			surface.clone_area(clone_tile_data)
 			step = step * 2
 		end
 
 		local rest = size - step
 		if rest > 0 then
-			source_left_top.y = y - rest
-			destination_left_top.y = y - step - rest
-			destination_right_bottom.y = y - step
-			surface.clone_area(clone_data)
+			tile_source_left_top.y = y - rest
+			tile_destination_left_top.y = y - step - rest
+			tile_destination_right_bottom.y = y - step
+			surface.clone_area(clone_tile_data)
 		end
 	end
 
 	if size >= 2 then
 		local step = 1
-		source_left_top.x = x
-		source_left_top.y = y - size
-		destination_left_top.y = y - size
-		source_right_bottom.y = y
-		destination_right_bottom.y = y
+		tile_source_left_top.x = x
+		tile_source_left_top.y = y - size
+		tile_destination_left_top.y = y - size
+		tile_source_right_bottom.y = y
+		tile_destination_right_bottom.y = y
 		local max_step = size / 2
 		while step <= max_step do
-			source_right_bottom.x = x + step
-			destination_left_top.x = x + step
-			destination_right_bottom.x = x + step * 2
-			surface.clone_area(clone_data)
+			tile_source_right_bottom.x = x + step
+			tile_destination_left_top.x = x + step
+			tile_destination_right_bottom.x = x + step * 2
+			surface.clone_area(clone_tile_data)
 			step = step * 2
 		end
 
 		local rest = size - step
 		if rest > 0 then
-			source_right_bottom.x = x + rest
-			destination_left_top.x = x + step
-			destination_right_bottom.x = x + step + rest
-			surface.clone_area(clone_data)
+			tile_source_right_bottom.x = x + rest
+			tile_destination_left_top.x = x + step
+			tile_destination_right_bottom.x = x + step + rest
+			surface.clone_area(clone_tile_data)
+		end
+	end
+end
+
+
+-- Initital x, y for left bottom corner which creates resourses to right top corner
+---@param surface LuaSurface
+---@param x number
+---@param y number
+---@param size integer
+---@param resource_name string
+---@param amount number
+---@param clone_area_param LuaSurface.clone_area_param #source_area and destination_area will be overwritten
+M.fill_box_with_resourses = function(surface, x, y, size, resource_name, amount, clone_area_param)
+	if amount == nil then
+		error("amount is nil")
+	end
+
+	local resource_source_left_top = {x = 0, y = 0}
+	local resource_source_right_bottom = {x = 0, y = 0}
+	local resource_destination_left_top = {x = 0, y = 0}
+	local resource_destination_right_bottom = {x = 0, y = 0}
+	clone_area_param.source_area = {
+		left_top = resource_source_left_top,
+		right_bottom = resource_source_right_bottom
+	}
+	clone_area_param.destination_area = {
+		left_top = resource_destination_left_top,
+		right_bottom = resource_destination_right_bottom
+	}
+
+	local create_entity = surface.create_entity
+	resource_data.amount = amount
+	resource_data.name = resource_name
+
+	y = y - 1 -- Factorio offsets it
+
+	resource_position[1] = x
+	resource_position[2] = y
+	create_entity(resource_data)
+	if size >= 2 then
+		resource_position[1] = x
+		resource_position[2] = y - 1
+		create_entity(resource_data)
+	end
+	if size == 3 then
+		resource_position[1] = x
+		resource_position[2] = y - 2
+		create_entity(resource_data)
+	end
+	y = y + 1
+
+	if size >= 4 then
+		local step = 2
+		resource_source_left_top.x = x
+		resource_source_right_bottom.y = y
+		resource_source_right_bottom.x = x + 1
+		resource_destination_left_top.x = x
+		resource_destination_right_bottom.x = x + 1
+		local max_step = size / 2
+		while step <= max_step do
+			resource_source_left_top.y = y - step
+			resource_destination_left_top.y = y - step * 2
+			resource_destination_right_bottom.y = y - step
+			surface.clone_area(clone_area_param)
+			step = step * 2
+		end
+
+		local rest = size - step
+		if rest > 0 then
+			resource_source_left_top.y = y - rest
+			resource_destination_left_top.y = y - step - rest
+			resource_destination_right_bottom.y = y - step
+			surface.clone_area(clone_area_param)
+		end
+	end
+
+	if size >= 2 then
+		local step = 1
+		resource_source_left_top.x = x
+		resource_source_left_top.y = y - size
+		resource_destination_left_top.y = y - size
+		resource_source_right_bottom.y = y
+		resource_destination_right_bottom.y = y
+		local max_step = size / 2
+		while step <= max_step do
+			resource_source_right_bottom.x = x + step
+			resource_destination_left_top.x = x + step
+			resource_destination_right_bottom.x = x + step * 2
+			surface.clone_area(clone_area_param)
+			step = step * 2
+		end
+
+		local rest = size - step
+		if rest > 0 then
+			resource_source_right_bottom.x = x + rest
+			resource_destination_left_top.x = x + step
+			resource_destination_right_bottom.x = x + step + rest
+			surface.clone_area(clone_area_param)
 		end
 	end
 end
