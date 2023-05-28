@@ -140,7 +140,7 @@ end
 ---@param y number
 ---@param size integer
 ---@param resource_name string
----@param amount number
+---@param amount uint
 ---@param clone_area_param LuaSurface.clone_area_param #source_area and destination_area will be overwritten
 M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount, clone_area_param)
 	if amount == nil then
@@ -239,11 +239,23 @@ end
 ---@param y number
 ---@param size integer
 ---@param tile_name string
-M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name)
+---@param amount uint
+M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name, amount)
+	if tile_name == nil then
+		error("tile_name is nil")
+	end
+	if amount == nil then
+		error("amount is nil")
+	end
+
+	y = y - 1
 	local create_entity = surface.create_entity
-	resource_data.
-	for x2 = 1, size do
-		for y2 = 1, size do
+	resource_data.amount = amount
+	resource_data.name = tile_name
+	for x2 = x, x + size - 1 do
+		for y2 = y - size + 1, y do
+			resource_position[1] = x2
+			resource_position[2] = y2
 			create_entity(resource_data)
 		end
 	end
