@@ -21,16 +21,18 @@ local clone_tile_data = {
 	create_build_effect_smoke=false
 }
 local resource_position = {0, 0}
+---@type LuaSurface.create_entity_param
 local resource_data = {name="", amount=4294967295, snap_to_tile_center=true, position=resource_position}
 
 
 -- Initital x, y for left bottom corner which creates tiles to right top corner
+-- This function clones area
 ---@param surface LuaSurface
 ---@param x number
 ---@param y number
 ---@param size integer
 ---@param tile_name string
-M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
+M.fill_horizontal_line_with_tiles = function(surface, x, y, size, tile_name)
 	y = y - 1 -- Factorio offsets it
 	local tiles = {
 		{position = {x, y}, name = tile_name}
@@ -68,6 +70,18 @@ M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
 			surface.clone_area(clone_tile_data)
 		end
 	end
+end
+
+
+-- Initital x, y for left bottom corner which creates tiles to right top corner
+-- This function clones area
+---@param surface LuaSurface
+---@param x number
+---@param y number
+---@param size integer
+---@param tile_name string
+M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
+	M.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
 
 	if size >= 2 then
 		local step = 1
@@ -96,7 +110,31 @@ M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
 end
 
 
--- Initital x, y for left bottom corner which creates resourses to right top corner
+-- Initital x, y for left bottom corner which creates tiles to right top corner
+---@param surface LuaSurface
+---@param x number
+---@param y number
+---@param size integer
+---@param tile_name string
+M.fill_box_with_tiles_safely = function(surface, x, y, size, tile_name)
+	local c = 0
+	for x2 = 1, size do
+		for y2 = 1, size do
+			c = c + 1
+			tiles[c] = {position = {x + x2, y + y2}, name = tile_name}
+			if c > 1024 then
+				surface.set_tiles(tiles, false, false, false)
+				tiles = {}
+				c = 0
+			end
+		end
+	end
+	surface.set_tiles(tiles, true, false, false)
+end
+
+
+-- Initital x, y for left bottom corner which creates resources to right top corner
+-- This function clones area
 ---@param surface LuaSurface
 ---@param x number
 ---@param y number
@@ -104,7 +142,7 @@ end
 ---@param resource_name string
 ---@param amount number
 ---@param clone_area_param LuaSurface.clone_area_param #source_area and destination_area will be overwritten
-M.fill_box_with_resourses = function(surface, x, y, size, resource_name, amount, clone_area_param)
+M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount, clone_area_param)
 	if amount == nil then
 		error("amount is nil")
 	end
@@ -194,5 +232,21 @@ M.fill_box_with_resourses = function(surface, x, y, size, resource_name, amount,
 	end
 end
 
+
+-- Initital x, y for left bottom corner which creates tiles to right top corner
+---@param surface LuaSurface
+---@param x number
+---@param y number
+---@param size integer
+---@param tile_name string
+M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name)
+	local create_entity = surface.create_entity
+	resource_data.
+	for x2 = 1, size do
+		for y2 = 1, size do
+			create_entity(resource_data)
+		end
+	end
+end
 
 return M
