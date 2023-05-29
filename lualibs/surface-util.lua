@@ -120,23 +120,7 @@ end
 
 M.fill_box_with_tiles_safely = function(surface, x, y, size, tile_name)
 	if size > 5 then
-		local temp_surface = global.ZO_surface_for_cloning
-		if temp_surface == nil then
-			temp_surface = game.create_surface("ZO_surface_for_cloning", {width = 1, height = 1})
-			global.ZO_surface_for_cloning = temp_surface
-		end
-		M.fill_box_with_tiles(temp_surface, 0, 0, size, tile_name)
-		tile_source_left_top.x = 0
-		tile_source_left_top.y = 0 - size
-		tile_source_right_bottom.x = 0 + size
-		tile_source_right_bottom.y = 0
-		tile_destination_left_top.x = x
-		tile_destination_left_top.y = y - size
-		tile_destination_right_bottom.x = x + size
-		tile_destination_right_bottom.y = y
-		clone_tile_param.destination_surface = surface
-		temp_surface.clone_area(clone_tile_param)
-		temp_surface.clear()
+		M.fill_box_with_tiles(surface, x, y, size, tile_name)
 		return
 	end
 
@@ -187,11 +171,21 @@ end
 ---@param size integer
 ---@param resource_name string
 ---@param amount uint
----@param clone_area_param LuaSurface.clone_area_param #source_area and destination_area will be overwritten
+---@param clone_area_param? LuaSurface.clone_area_param
 M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount, clone_area_param)
+	if size <= 7 then
+		M.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
+	end
 	if amount == nil then
 		error("amount is nil")
 	end
+
+	clone_area_param = clone_area_param or {
+		clone_tiles=false,
+		clone_decoratives=false, clear_destination_entities=false,
+		clear_destination_decoratives=false, expand_map=false,
+		create_build_effect_smoke=false
+	}
 
 	local resource_source_left_top = {x = 0, y = 0}
 	local resource_source_right_bottom = {x = 0, y = 0}
@@ -211,7 +205,6 @@ M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount,
 	resource_data.name = resource_name
 
 	y = y - 1 -- Factorio offsets it
-
 	resource_position[1] = x
 	resource_position[2] = y
 	create_entity(resource_data)
@@ -279,16 +272,36 @@ M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount,
 end
 
 
--- Initital x, y for left bottom corner which creates tiles to right top corner
+-- Initital x, y for left bottom corner which creates resources to right top corner
 ---@param surface LuaSurface
 ---@param x number
 ---@param y number
 ---@param size integer
----@param tile_name string
+---@param resource_name string
 ---@param amount uint
-M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name, amount)
-	if tile_name == nil then
-		error("tile_name is nil")
+M.fill_box_with_resources_safely = function(surface, x, y, size, resource_name, amount)
+	if size > 7 then
+		local temp_surface = global.ZO_surface_for_cloning
+		if temp_surface == nil then
+			temp_surface = game.create_surface("ZO_surface_for_cloning", {width = 1, height = 1})
+			global.ZO_surface_for_cloning = temp_surface
+		end
+		M.fill_box_with_resources(surface, x, y, size, resource_name, amount)
+		tile_source_left_top.x = 0
+		tile_source_left_top.y = 0 - size
+		tile_source_right_bottom.x = 0 + size
+		tile_source_right_bottom.y = 0
+		tile_destination_left_top.x = x
+		tile_destination_left_top.y = y - size
+		tile_destination_right_bottom.x = x + size
+		tile_destination_right_bottom.y = y
+		clone_tile_param.destination_surface = surface
+		temp_surface.clone_area(clone_tile_param)
+		temp_surface.clear()
+		return
+	end
+	if resource_name == nil then
+		error("resource_name is nil")
 	end
 	if amount == nil then
 		error("amount is nil")
@@ -297,7 +310,7 @@ M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name, amou
 	y = y - 1
 	local create_entity = surface.create_entity
 	resource_data.amount = amount
-	resource_data.name = tile_name
+	resource_data.name = resource_name
 	for x2 = x, x + size - 1 do
 		for y2 = y - size + 1, y do
 			resource_position[1] = x2
@@ -306,5 +319,6 @@ M.fill_box_with_resources_safely = function(surface, x, y, size, tile_name, amou
 		end
 	end
 end
+
 
 return M
