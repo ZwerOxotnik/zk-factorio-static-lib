@@ -118,12 +118,14 @@ end
 ---@param tile_name string
 M.fill_box_with_tiles_safely = function(surface, x, y, size, tile_name)
 	local c = 0
-	for x2 = 1, size do
-		for y2 = 1, size do
+	local tiles = {}
+	y = y - 1
+	for x2 = x, x + size - 1 do
+		for y2 = y - size + 1, y do
 			c = c + 1
-			tiles[c] = {position = {x + x2, y + y2}, name = tile_name}
+			tiles[c] = {position = {x2, y2}, name = tile_name}
 			if c > 1024 then
-				surface.set_tiles(tiles, false, false, false)
+				surface.set_tiles(tiles, true, false, false)
 				tiles = {}
 				c = 0
 			end
