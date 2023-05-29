@@ -84,13 +84,9 @@ end
 ---@param size integer
 ---@param tile_name string
 M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
-	if size <= 5 then
-		M.fill_box_with_tiles_safely(surface, x, y, size, tile_name)
-	end
+	if size > 5 then
+		M.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
 
-	M.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
-
-	if size >= 2 then
 		clone_tile_param.destination_surface = surface
 		local step = 1
 		tile_source_left_top.x = x
@@ -114,13 +110,6 @@ M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
 			tile_destination_right_bottom.x = x + step + rest
 			surface.clone_area(clone_tile_param)
 		end
-	end
-end
-
-
-M.fill_box_with_tiles_safely = function(surface, x, y, size, tile_name)
-	if size > 5 then
-		M.fill_box_with_tiles(surface, x, y, size, tile_name)
 		return
 	end
 
