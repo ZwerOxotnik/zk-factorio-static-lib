@@ -6,6 +6,10 @@
 ---@type table<string, table>
 local libraries = {}
 
+
+local script = script -- some mod devs overwrite it
+
+
 local setup_ran = false
 
 local register_remote_interfaces = function()
