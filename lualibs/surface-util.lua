@@ -324,14 +324,14 @@ M.flip_tiles_vertically_and_horizontally = function(surface, find_param, destina
 	local right_bottom_x = find_param.area.right_bottom.x
 	local right_bottom_y = find_param.area.right_bottom.y
 	if destination_left_top and find_param.area and destination_surface == nil then
-		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 1
-		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y + -1
+		x_diff = abs((destination_left_top.x or destination_left_top[1]) - left_top_x) + 1
+		y_diff = abs((destination_left_top.y or destination_left_top[2]) - left_top_y) - 1
 	end
 	destination_surface = destination_surface or surface
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-    for i=1, #tiles do
+	for i=1, #tiles do
 		local tile = tiles[i]
 		local position = tile.position
 		local x = position.x
@@ -366,14 +366,14 @@ M.flip_tiles_horizontally = function(surface, find_param, destination_left_top, 
 	local left_top_y = find_param.area.left_top.y
 	local right_bottom_x = find_param.area.right_bottom.x
 	if destination_left_top and find_param.area and destination_surface == nil then
-		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 1
-		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y
+		x_diff = abs((destination_left_top.x or destination_left_top[1]) - left_top_x) + 1
+		y_diff = abs((destination_left_top.y or destination_left_top[2]) - left_top_y)
 	end
 	destination_surface = destination_surface or surface
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-    for i=1, #tiles do
+	for i=1, #tiles do
 		local tile = tiles[i]
 		local position = tile.position
 		local x = position.x
@@ -405,14 +405,14 @@ M.flip_tiles_vertically = function(surface, find_param, destination_left_top, de
 	local left_top_y = find_param.area.left_top.y
 	local right_bottom_y = find_param.area.right_bottom.y
 	if destination_left_top and find_param.area and destination_surface == nil then
-		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 0
-		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y + -1
+		x_diff = abs((destination_left_top.x or destination_left_top[1]) - left_top_x)
+		y_diff = abs((destination_left_top.y or destination_left_top[2]) - left_top_y) - 1
 	end
 	destination_surface = destination_surface or surface
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-    for i=1, #tiles do
+	for i=1, #tiles do
 		local tile = tiles[i]
 		local position = tile.position
 		local x = position.x - x_diff
