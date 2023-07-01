@@ -25,6 +25,7 @@ local clone_tile_param = {
 local resource_position = {0, 0}
 ---@type LuaSurface.create_entity_param
 local resource_data = {name="", amount=4294967295, snap_to_tile_center=true, position=resource_position}
+local abs = math.abs
 
 
 -- Initital x, y for left bottom corner which creates tiles to right top corner
@@ -307,6 +308,127 @@ M.fill_box_with_resources_safely = function(surface, x, y, size, resource_name, 
 			create_entity(resource_data)
 		end
 	end
+end
+
+
+-- WARNING: not tested fully, probably has major bugs
+---@param surface LuaSurface
+---@param find_param LuaSurface.find_tiles_filtered_param -- {left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}
+---@param destination_left_top Vector?  -- {x = 0, y = 0}
+---@param destination_surface LuaSurface?
+M.flip_tiles_vertically_and_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+	local x_diff = 1
+	local y_diff = -1
+	local left_top_x = find_param.area.left_top.x
+	local left_top_y = find_param.area.left_top.y
+	local right_bottom_x = find_param.area.right_bottom.x
+	local right_bottom_y = find_param.area.right_bottom.y
+	if destination_left_top and find_param.area and destination_surface == nil then
+		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 1
+		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y + -1
+	end
+	destination_surface = destination_surface or surface
+	local tiles = surface.find_tiles_filtered(find_param)
+	local c = 0
+	local tiles_data = {}
+    for i=1, #tiles do
+		local tile = tiles[i]
+		local position = tile.position
+		local x = position.x
+		local x_to_left_top = abs(left_top_x - x)
+		local x_to_right_bottom = abs(right_bottom_x - x)
+		x = position.x - x_diff + (x_to_right_bottom - x_to_left_top)
+		local y = position.y
+		local y_to_left_top = abs(left_top_y - y)
+		local y_to_right_bottom = abs(right_bottom_y - y)
+		y = position.y - y_diff + (y_to_right_bottom - y_to_left_top)
+		c = c + 1
+		tiles_data[c] = {name = tile.name, position = {x = x, y = y}}
+		if c > 1024 then
+			destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
+			tiles_data = {}
+			c = 0
+		end
+	end
+	destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
+end
+
+
+-- WARNING: not tested fully, probably has major bugs
+---@param surface LuaSurface
+---@param find_param LuaSurface.find_tiles_filtered_param -- {left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}
+---@param destination_left_top Vector?  -- {x = 0, y = 0}
+---@param destination_surface LuaSurface?
+M.flip_tiles_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+	local x_diff = 1
+	local y_diff = 0
+	local left_top_x = find_param.area.left_top.x
+	local left_top_y = find_param.area.left_top.y
+	local right_bottom_x = find_param.area.right_bottom.x
+	if destination_left_top and find_param.area and destination_surface == nil then
+		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 1
+		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y
+	end
+	destination_surface = destination_surface or surface
+	local tiles = surface.find_tiles_filtered(find_param)
+	local c = 0
+	local tiles_data = {}
+    for i=1, #tiles do
+		local tile = tiles[i]
+		local position = tile.position
+		local x = position.x
+		local x_to_left_top = abs(left_top_x - x)
+		local x_to_right_bottom = abs(right_bottom_x - x)
+		x = position.x - x_diff + (x_to_right_bottom - x_to_left_top)
+		local y = position.y - y_diff
+		c = c + 1
+		tiles_data[c] = {name = tile.name, position = {x = x, y = y}}
+		if c > 1024 then
+			destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
+			tiles_data = {}
+			c = 0
+		end
+	end
+	destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
+end
+
+
+-- WARNING: not tested fully, probably has major bugs
+---@param surface LuaSurface
+---@param find_param LuaSurface.find_tiles_filtered_param -- {left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}
+---@param destination_left_top Vector?  -- {x = 0, y = 0}
+---@param destination_surface LuaSurface?
+M.flip_tiles_vertically = function(surface, find_param, destination_left_top, destination_surface)
+	local x_diff = 0
+	local y_diff = -1
+	local left_top_x = find_param.area.left_top.x
+	local left_top_y = find_param.area.left_top.y
+	local right_bottom_y = find_param.area.right_bottom.y
+	if destination_left_top and find_param.area and destination_surface == nil then
+		x_diff = (destination_left_top.x or destination_left_top[1]) - left_top_x + 0
+		y_diff = (destination_left_top.y or destination_left_top[2]) - left_top_y + -1
+	end
+	destination_surface = destination_surface or surface
+	local tiles = surface.find_tiles_filtered(find_param)
+	local c = 0
+	local tiles_data = {}
+    for i=1, #tiles do
+		local tile = tiles[i]
+		local position = tile.position
+		local x = position.x - x_diff
+		local y = position.y
+		local y_to_left_top = abs(left_top_y - y)
+		local y_to_right_bottom = abs(right_bottom_y - y)
+		y = position.y - y_diff + (y_to_right_bottom - y_to_left_top)
+		c = c + 1
+		tiles_data[c] = {name = tile.name, position = {x = x, y = y}}
+		if c > 1024 then
+			destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
+			tiles_data = {}
+			c = 0
+		end
+	end
+	destination_surface.set_tiles(tiles_data, true, false, false) -- corrects tiles
 end
 
 
