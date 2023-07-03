@@ -79,16 +79,21 @@ end
 
 
 ---@param player LuaPlayer
+M.delete_character = function(player)
+	local character = player.character
+	if character and character.valid then
+		character.destroy({raise_destroy=true})
+	end
+end
+
+---@param player LuaPlayer
 ---@param character_name string? # "character" by default
 M.create_new_character = function(player, character_name)
 	--TODO: improve
 	character_name = character_name or "character"
 
 	-- Delete old character
-	local character = player.character
-	if character and character.valid then
-		character.destroy({raise_destroy=true})
-	end
+	M.delete_character(player)
 
 	-- Create new character (perhaps, it should be improved)
 	character = player.surface.create_entity{
