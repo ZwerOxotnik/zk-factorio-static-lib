@@ -117,15 +117,13 @@ M.teleport_players = function(players, surface, position)
 	end
 
 	for _, player in pairs(players) do
-		if player.valid then
+		if not player.valid then
 			goto continue
 		end
 		local target = player
 		local character = player.character
-		if not (character and character.valid) then
-			character = nil
-		else
-			local vehicle = player.vehicle
+		if character and character.valid then
+			local vehicle = character.vehicle
 			if vehicle and vehicle.valid and not vehicle.train
 				and vehicle.get_driver() == character
 				and vehicle.get_passenger() == nil
