@@ -1,6 +1,8 @@
-local module = {}
+---@class ZOplayer
+local M = {}
 
-module.get_new_resource_position_by_player_resource = function(player, resource)
+
+M.get_new_resource_position_by_player_resource = function(player, resource)
 	local resource_reach_distance = player.resource_reach_distance
 	if resource_reach_distance > 40 then
 		resource_reach_distance = 40
@@ -16,7 +18,7 @@ module.get_new_resource_position_by_player_resource = function(player, resource)
 	return
 end
 
-module.get_resource_position_for_player = function(player)
+M.get_resource_position_for_player = function(player)
 	local resource_reach_distance = player.resource_reach_distance
 	if resource_reach_distance > 40 then
 		resource_reach_distance = 40
@@ -31,4 +33,124 @@ module.get_resource_position_for_player = function(player)
 	end
 end
 
-return module
+
+---@param player LuaPlayer
+---@param surface LuaSurface
+---@param target_position MapPosition.0|MapPosition.1
+M.teleport_safely = function(player, surface, target_position)
+	local character = player.character
+	if not (character and character.valid) then
+		-- Perhaps, its should beginning changed
+		player.teleport(target_position, surface)
+		return true
+	end
+
+	local target
+	local is_vehicle = false
+	local vehicle = player.vehicle
+	local target_name
+	if vehicle and vehicle.valid and not vehicle.train and vehicle.get_driver() == character and vehicle.get_passenger() == nil then
+		target = vehicle
+		target_name = vehicle.name
+		is_vehicle = true
+	else
+		target = player
+		target_name = character.name
+	end
+	local radius = 200
+	local non_colliding_position = surface.find_non_colliding_position(target_name, target_position, radius, 5)
+
+	if not non_colliding_position then
+		-- TODO: add localization
+		player.print("It's not possible to teleport you because there's not enough space for your character")
+		return false
+	end
+
+	if is_vehicle then
+		if vehicle.type == "spider-vehicle" then
+			target.stop_spider()
+		else
+			target.speed = 0
+		end
+	end
+	target.teleport(non_colliding_position, surface)
+	return true
+end
+
+
+---@param player LuaPlayer
+---@param character_name string? # "character" by default
+M.create_new_character = function(player, character_name)
+	--TODO: improve
+	character_name = character_name or "character"
+
+	-- Delete old character
+	local character = player.character
+	if character and character.valid then
+		character.destroy({raise_destroy=true})
+	end
+
+	-- Create new character (perhaps, it should be improved)
+	character = player.surface.create_entity{
+		name=character_name, force = player.force, position = player.position
+	}
+	player.set_controller({
+		type = defines.controllers.character,
+		character = character
+	})
+	player.spectator = false
+end
+
+
+---@param players table<any, LuaPlayer>
+---@param surface LuaSurface
+---@param position MapPosition.0|MapPosition.1
+---@return boolean
+M.teleport_players = function(players, surface, position)
+	if not (surface and surface.valid) then
+		return false
+	end
+
+	for _, player in pairs(players) do
+		if player.valid then
+			goto continue
+		end
+		local target = player
+		local character = player.character
+		if not (character and character.valid) then
+			character = nil
+		else
+			local vehicle = player.vehicle
+			if vehicle and vehicle.valid and not vehicle.train
+				and vehicle.get_driver() == character
+				and vehicle.get_passenger() == nil
+			then
+				target = vehicle
+			end
+		end
+		target.teleport(position, surface)
+		:: continue ::
+	end
+	return true
+end
+
+
+---@param players table<any, LuaPlayer>
+---@param surface LuaSurface
+---@param position MapPosition.0|MapPosition.1
+---@return boolean
+M.teleport_players_safely = function(players, surface, position)
+	if not (surface and surface.valid) then
+		return false
+	end
+
+	for _, player in pairs(players) do
+		if player.valid then
+			M.teleport_safely(player, surface, position)
+		end
+	end
+	return true
+end
+
+
+return M
