@@ -17,10 +17,14 @@ limitations under the License.
 -- check: https://lua-api.factorio.com/latest/LuaInventory.html
 -- https://lua-api.factorio.com/latest/Concepts.html#SimpleItemStack
 
-local module = {}
+local entity_util = {}
+
+
+local random = math.random
+
 
 -- the items must have count
-module.transfer_items = function(source, items, destination)
+entity_util.transfer_items = function(source, items, destination)
     local items_amount = items.count or items.amount
     local count = source.get_item_count(items.name)
     if items_amount > count then
@@ -34,4 +38,19 @@ module.transfer_items = function(source, items, destination)
     return inserted_items_count
 end
 
-return module
+
+---@param entities LuaEntity[]
+---@param tries integer? # 10 by default
+---@return LuaEntity?
+entity_util.pick_random_entity_with_heath = function(entities, tries)
+	tries = tries or 10
+	for _ = 1, tries do
+		local entity = entities[random(1, #entities)]
+		if entity.health and entity.destructible then
+			return entity
+		end
+	end
+end
+
+
+return entity_util
