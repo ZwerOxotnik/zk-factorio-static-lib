@@ -177,4 +177,22 @@ player_util.teleport_players_safely = function(players, surface, position)
 end
 
 
+---@param players table<any, LuaPlayer>
+---@param message table|string
+---@param color table?
+---@return boolean
+player_util.print_to_players = function(players, message, color)
+	if message == nil then
+		return false
+	end
+
+	for _, player in pairs(players) do
+		if player.valid then
+			player.print(message, color)
+		end
+	end
+	return true
+end
+
+
 return player_util
