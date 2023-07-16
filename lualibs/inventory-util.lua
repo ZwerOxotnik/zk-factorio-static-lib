@@ -1,11 +1,11 @@
 ---@class ZOinventory
-local M = {}
+local inventory_util = {}
 
 
 ---@param source_inventory LuaInventory
 ---@param reciever_inventory LuaInventory
 ---@return boolean
-M.copy_inventory_items_safely = function(source_inventory, reciever_inventory)
+inventory_util.copy_inventory_items_safely = function(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -31,7 +31,7 @@ end
 ---@param source_inventory LuaInventory
 ---@param reciever_inventory LuaInventory
 ---@return boolean
-M.copy_inventory_items = function(source_inventory, reciever_inventory)
+inventory_util.copy_inventory_items = function(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -53,7 +53,7 @@ end
 ---@param source_inventory LuaInventory
 ---@param player LuaPlayer
 ---@return boolean
-M.copy_inventory_items_to_player = function(source_inventory, player)
+inventory_util.copy_inventory_items_to_player = function(source_inventory, player)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -87,7 +87,7 @@ end
 
 ---@param reciever LuaInventory|LuaEntity
 ---@param items table[]
-M.insert_items_safely = function(reciever, items)
+inventory_util.insert_items_safely = function(reciever, items)
 	local item_prototypes = game.item_prototypes
 	for i=1, #items do
 		local item_data = items[i]
@@ -100,7 +100,7 @@ end
 
 ---@param reciever LuaInventory|LuaEntity
 ---@param items table[]
-M.remove_items_safely = function(reciever, items)
+inventory_util.remove_items_safely = function(reciever, items)
 	local item_prototypes = game.item_prototypes
 	for i=1, #items do
 		local item_data = items[i]
@@ -111,4 +111,4 @@ M.remove_items_safely = function(reciever, items)
 end
 
 
-return M
+return inventory_util
