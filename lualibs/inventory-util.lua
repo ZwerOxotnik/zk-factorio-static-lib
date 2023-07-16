@@ -85,4 +85,30 @@ M.copy_inventory_items_to_player = function(source_inventory, player)
 end
 
 
+---@param reciever LuaInventory|LuaEntity
+---@param items table[]
+M.insert_items_safely = function(reciever, items)
+	local item_prototypes = game.item_prototypes
+	for i=1, #items do
+		local item_data = items[i]
+		if item_prototypes[item_data.name] then
+			reciever.insert(item_data)
+		end
+	end
+end
+
+
+---@param reciever LuaInventory|LuaEntity
+---@param items table[]
+M.remove_items_safely = function(reciever, items)
+	local item_prototypes = game.item_prototypes
+	for i=1, #items do
+		local item_data = items[i]
+		if item_prototypes[item_data.name] then
+			reciever.remove(item_data)
+		end
+	end
+end
+
+
 return M
