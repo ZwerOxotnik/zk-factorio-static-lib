@@ -1,8 +1,8 @@
 ---@class ZOplayer
-local M = {}
+local player_util = {}
 
 
-M.get_new_resource_position_by_player_resource = function(player, resource)
+player_util.get_new_resource_position_by_player_resource = function(player, resource)
 	local resource_reach_distance = player.resource_reach_distance
 	if resource_reach_distance > 40 then
 		resource_reach_distance = 40
@@ -18,7 +18,7 @@ M.get_new_resource_position_by_player_resource = function(player, resource)
 	return
 end
 
-M.get_resource_position_for_player = function(player)
+player_util.get_resource_position_for_player = function(player)
 	local resource_reach_distance = player.resource_reach_distance
 	if resource_reach_distance > 40 then
 		resource_reach_distance = 40
@@ -35,9 +35,24 @@ end
 
 
 ---@param player LuaPlayer
----@param surface LuaSurface
----@param target_position MapPosition.0|MapPosition.1
-M.teleport_safely = function(player, surface, target_position)
+---@param surface LuaSurface?
+---@param target_position? MapPosition.0|MapPosition.1
+---@return boolean
+player_util.teleport_safely = function(player, surface, target_position)
+	if not (player and player.valid) then
+		return false
+	end
+	if surface then
+		if not surface.valid then
+			return false
+		end
+	else
+		surface = player.surface
+	end
+	if target_position == nil then
+		return false
+	end
+
 	local character = player.character
 	if not (character and character.valid) then
 		-- Perhaps, its should beginning changed
@@ -79,7 +94,7 @@ end
 
 
 ---@param player LuaPlayer
-M.delete_character = function(player)
+player_util.delete_character = function(player)
 	local character = player.character
 	if character and character.valid then
 		character.destroy({raise_destroy=true})
@@ -88,12 +103,12 @@ end
 
 ---@param player LuaPlayer
 ---@param character_name string? # "character" by default
-M.create_new_character = function(player, character_name)
+player_util.create_new_character = function(player, character_name)
 	--TODO: improve
 	character_name = character_name or "character"
 
 	-- Delete old character
-	M.delete_character(player)
+	player_util.delete_character(player)
 
 	-- Create new character (perhaps, it should be improved)
 	character = player.surface.create_entity{
@@ -111,7 +126,10 @@ end
 ---@param surface LuaSurface
 ---@param position MapPosition.0|MapPosition.1
 ---@return boolean
-M.teleport_players = function(players, surface, position)
+player_util.teleport_players = function(players, surface, position)
+	if position == nil then
+		return false
+	end
 	if not (surface and surface.valid) then
 		return false
 	end
@@ -142,18 +160,21 @@ end
 ---@param surface LuaSurface
 ---@param position MapPosition.0|MapPosition.1
 ---@return boolean
-M.teleport_players_safely = function(players, surface, position)
+player_util.teleport_players_safely = function(players, surface, position)
+	if position == nil then
+		return false
+	end
 	if not (surface and surface.valid) then
 		return false
 	end
 
 	for _, player in pairs(players) do
 		if player.valid then
-			M.teleport_safely(player, surface, position)
+			player_util.teleport_safely(player, surface, position)
 		end
 	end
 	return true
 end
 
 
-return M
+return player_util
