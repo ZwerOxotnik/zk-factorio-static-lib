@@ -17,4 +17,18 @@ force_util.change_techs_safely = function(force, techs, field_name, value)
 end
 
 
+---@param force LuaForce
+---@param techs string[]
+force_util.research_techs_safely = function(force, techs)
+	local technologies = force.technologies
+	for i=1, #techs do
+		local tech_name = techs[i]
+		local tech = technologies[tech_name]
+		if tech then
+			tech.researched = true
+		end
+	end
+end
+
+
 return force_util
