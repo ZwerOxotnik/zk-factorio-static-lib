@@ -1,3 +1,4 @@
+---@class ZOentity_util
 local entity_util = {build = 1}
 
 

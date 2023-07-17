@@ -1,4 +1,4 @@
----@class ZWlocale
+---@class ZOlocale_util
 local locale_util = {build = 1}
 
 

@@ -1,4 +1,4 @@
----@class ZOprototype
+---@class ZOprototype_util
 local prototype_util = {build = 1}
 
 

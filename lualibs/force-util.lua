@@ -1,4 +1,4 @@
----@class ZOforce
+---@class ZOforce_util
 local force_util = {build = 1}
 
 

@@ -1,5 +1,5 @@
 -- Works for any stage
----@class ZWversion
+---@class ZOversion_util
 local version_util = {build = 1}
 
 

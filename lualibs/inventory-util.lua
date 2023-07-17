@@ -1,4 +1,4 @@
----@class ZOinventory
+---@class ZOinventory_util
 local inventory_util = {build = 1}
 
 

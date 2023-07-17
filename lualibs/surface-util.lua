@@ -1,4 +1,4 @@
----@class ZOsurface
+---@class ZOsurface_util
 local surface_util = {build = 1}
 
 

@@ -1,4 +1,4 @@
----@class ZOMarket
+---@class ZOMarket_util
 local market_util = {build = 1}
 
 

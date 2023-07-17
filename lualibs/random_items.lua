@@ -1,6 +1,7 @@
 -- WARNING! This script doesn't support multi-teams yet
 -- And also requires a few more tests
 
+---@class ZOrandom_items
 local random_items = {build = 1}
 
 

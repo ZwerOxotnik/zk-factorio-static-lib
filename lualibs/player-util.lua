@@ -1,4 +1,4 @@
----@class ZOplayer
+---@class ZOplayer_util
 local player_util = {build = 1}
 
 

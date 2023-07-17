@@ -1,4 +1,4 @@
----@class ZOtime
+---@class ZOtime_util
 local time_util = {build = 1}
 
 
