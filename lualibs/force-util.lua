@@ -1,11 +1,19 @@
 ---@class ZOforce
-local force_util = {}
+local force_util = {build = 1}
+
+
+--[[
+force_util.change_techs_safely(force, techs, field_name, value)
+force_util.research_techs_safely(force, techs)
+force_util.count_techs(force): integer, integer, number
+force_util.print_to_forces(forces, message, color?): boolean
+]]
 
 
 ---@param force LuaForce
 ---@param techs string[]
 ---@param value any
-force_util.change_techs_safely = function(force, techs, field_name, value)
+function force_util.change_techs_safely(force, techs, field_name, value)
 	local technologies = force.technologies
 	for i=1, #techs do
 		local tech_name = techs[i]
@@ -19,7 +27,7 @@ end
 
 ---@param force LuaForce
 ---@param techs string[]
-force_util.research_techs_safely = function(force, techs)
+function force_util.research_techs_safely(force, techs)
 	local technologies = force.technologies
 	for i=1, #techs do
 		local tech_name = techs[i]
@@ -33,7 +41,7 @@ end
 
 ---@param force LuaForce
 ---@return integer, integer, number # researched_techs, total_techs, tech_ratio
-force_util.count_techs = function(force, techs)
+function force_util.count_techs(force)
 	local researched_techs = 0
 	local total_techs = 0
 
@@ -48,6 +56,25 @@ force_util.count_techs = function(force, techs)
 	end
 
 	return researched_techs, total_techs, researched_techs / total_techs
+end
+
+
+
+---@param forces table<any, LuaForce>
+---@param message table|string
+---@param color table?
+---@return boolean
+function force_util.print_to_forces(forces, message, color)
+	if message == nil then
+		return false
+	end
+
+	for _, force in pairs(forces) do
+		if force.valid then
+			force.print(message, color)
+		end
+	end
+	return true
 end
 
 

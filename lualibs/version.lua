@@ -1,13 +1,20 @@
 -- Works for any stage
 ---@class ZWversion
-local M = {}
+local version_util = {build = 1}
+
+
+--[[
+version_util.string_to_version(str): number
+version_util.string_to_version()
+version_util.get_mod_version(mod_name): integer
+]]
 
 
 -- Supports strings like: "5", "5.5", "5.5.5"
 ---@param str string
----@return number version
+---@return integer? # version
 ---@overload fun()
-M.string_to_version = function(str)
+function version_util.string_to_version(str)
   if not str then return end
   local version, major, patch = str:match("(%d+)%.?(%d*)%.?(%d*)")
   version = version * 1e10
@@ -18,21 +25,20 @@ end
 
 
 ---@param mod_name string
----@return version
----@overload fun()
-M.get_mod_version = nil
+---@return integer? # version
+version_util.get_mod_version = nil
 
 if script and script.active_mods then
   -- For control stage
-  M.get_mod_version = function(mod_name)
-    return M.string_to_version(scripts.active_mods[mod_name])
+  function version_util.get_mod_version(mod_name)
+    return version_util.string_to_version(scripts.active_mods[mod_name])
   end
 else
   -- For data/settings stage
-  M.get_mod_version = function(mod_name)
-    return M.string_to_version(mods[mod_name])
+  function version_util.get_mod_version(mod_name)
+    return version_util.string_to_version(mods[mod_name])
   end
 end
 
 
-return M
+return version_util

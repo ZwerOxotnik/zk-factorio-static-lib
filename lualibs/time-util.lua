@@ -1,5 +1,10 @@
 ---@class ZOtime
-local M = {}
+local time_util = {build = 1}
+
+
+--[[
+time_util.ticks_to_game_mm_ss(ticks, format="mm:ss"): string
+]]
 
 
 local floor = math.floor
@@ -8,7 +13,7 @@ local floor = math.floor
 ---@param ticks integer
 ---@param format string? # "mm:ss" by default
 ---@return string
-M.ticks_to_game_mm_ss = function(ticks, format)
+function time_util.ticks_to_game_mm_ss(ticks, format)
 	format = format or "%s:%s"
 	local ticks_in_1_second = 60 * game.speed
 	local ticks_in_1_minute = 60 * ticks_in_1_second
@@ -35,4 +40,4 @@ M.ticks_to_game_mm_ss = function(ticks, format)
 end
 
 
-return M
+return time_util

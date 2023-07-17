@@ -1,5 +1,14 @@
 ---@class ZWlocale
-local M = {}
+local locale_util = {build = 1}
+
+
+--[[
+locale_util.array_to_locale(array): table?
+locale_util.array_to_locale_as_new(array): table?
+locale_util.locale_to_array(locale): table
+locale_util.merge_locales(...: table): table
+locale_util.merge_locales_as_new(...: table): table
+]]
 
 
 local type = type
@@ -9,7 +18,7 @@ local tinsert = table.insert
 
 ---@param array table
 ---@return table?
-M.array_to_locale = function(array)
+function locale_util.array_to_locale(array)
 	local locale
 	if #array <= 10 then
 		locale = array
@@ -58,8 +67,8 @@ end
 
 ---@param array table
 ---@return table?
-M.array_to_locale_as_new = function(array)
-	local locale = M.array_to_locale(array)
+function locale_util.array_to_locale_as_new(array)
+	local locale = locale_util.array_to_locale(array)
 	if locale then
 		return deepcopy(locale)
 	end
@@ -68,7 +77,7 @@ end
 
 ---@param locale table
 ---@return table
-M.locale_to_array = function(locale)
+function locale_util.locale_to_array(locale)
 	local v1 = locale[1]
 	if not (type(v1) == "string" and #v1 == 0) then return locale end
 
@@ -76,7 +85,7 @@ M.locale_to_array = function(locale)
 	for _, _data in pairs(locale) do
 		local _type = type(_data)
 		if _type == "table" then
-			local new_array = M.locale_to_array(_data)
+			local new_array = locale_util.locale_to_array(_data)
 			if new_array == _data then
 				array[#array+1] = _data
 			else
@@ -98,7 +107,7 @@ end
 
 ---@vararg table
 ---@return table
-M.merge_locales = function(...)
+function locale_util.merge_locales(...)
 	local args = {...}
 	local new_locale = {}
 
@@ -110,7 +119,7 @@ M.merge_locales = function(...)
 			for _, data in pairs(locale) do
 				local _type = type(data)
 				if _type == "table" then
-					local new_array = M.locale_to_array(data)
+					local new_array = locale_util.locale_to_array(data)
 					if new_array == data or #new_array == 0 then
 						new_locale[#new_locale+1] = data
 					else
@@ -129,15 +138,15 @@ M.merge_locales = function(...)
 		end
 	end
 
-	return M.array_to_locale(new_locale)
+	return locale_util.array_to_locale(new_locale)
 end
 
 
 ---@vararg table
 ---@return table
-M.merge_locales_as_new = function(...)
-	return deepcopy(M.merge_locales(...))
+function locale_util.merge_locales_as_new(...)
+	return deepcopy(locale_util.merge_locales(...))
 end
 
 
-return M
+return locale_util

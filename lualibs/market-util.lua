@@ -1,5 +1,12 @@
 ---@class ZOMarket
-local market_util = {}
+local market_util = {build = 1}
+
+
+--[[
+market_util.add_offers_safely(target, offers): integer -- amount of added offers
+market_util.add_offer_safely(target, offer_data): boolean
+market_util.add_offers(target, offers)
+]]
 
 
 market_util.validation_rules = {
@@ -29,7 +36,7 @@ market_util.validation_rules = {
 ---@param target LuaEntity
 ---@param offers Offer[]
 ---@return integer # amount of added offers
-market_util.add_offers_safely = function(target, offers)
+function market_util.add_offers_safely(target, offers)
 	local validation_rules = market_util.validation_rules
 	local item_prototypes = game.item_prototypes
 	local add_market_item = target.add_market_item
@@ -62,7 +69,7 @@ end
 ---@param target LuaEntity
 ---@param offer_data Offer
 ---@return boolean # is added
-market_util.add_offer_safely = function(target, offer_data)
+function market_util.add_offer_safely(target, offer_data)
 	local item_prototypes = game.item_prototypes
 	local prices = offer_data.price
 	for j=1, #prices do
@@ -86,7 +93,7 @@ end
 ---Please, use add_offers_safely(target, offers) instead
 ---@param target LuaEntity
 ---@param offers Offer[]
-market_util.add_offers = function(target, offers)
+function market_util.add_offers(target, offers)
 	local add_market_item = target.add_market_item
 	for i = 1, #offers do
 		local offer_data = offers[i]

@@ -1,5 +1,19 @@
 ---@class ZOsurface
-local M = {}
+local surface_util = {build = 1}
+
+
+--[[
+surface_util.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
+surface_util.fill_box_with_tiles(surface, x, y, size, tile_name)
+surface_util.fill_box_with_resources(surface, x, y, size, resource_name, amount, clone_area_param?)
+surface_util.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
+surface_util.flip_tiles_vertically_and_horizontally(surface, find_param, destination_left_top?, destination_surface?)
+surface_util.flip_entities_vertically_and_horizontally(surface, find_param, destination_left_top?, destination_surface?)
+surface_util.flip_entities_horizontally(surface, find_param, destination_left_top?, destination_surface?)
+surface_util.flip_tiles_horizontally(surface, find_param, destination_left_top?, destination_surface?)
+surface_util.flip_tiles_vertically(surface, find_param, destination_left_top?, destination_surface?)
+surface_util.flip_entities_vertically(surface, find_param, destination_left_top?, destination_surface?)
+]]
 
 
 local tile_source_left_top = {x = 0, y = 0}
@@ -35,7 +49,7 @@ local abs = math.abs
 ---@param y number
 ---@param size integer
 ---@param tile_name string
-M.fill_horizontal_line_with_tiles = function(surface, x, y, size, tile_name)
+function surface_util.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
 	y = y - 1 -- Factorio offsets it
 	local tiles = {
 		{position = {x, y}, name = tile_name}
@@ -84,9 +98,9 @@ end
 ---@param y number
 ---@param size integer
 ---@param tile_name string
-M.fill_box_with_tiles = function(surface, x, y, size, tile_name)
+function surface_util.fill_box_with_tiles(surface, x, y, size, tile_name)
 	if size > 5 then
-		M.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
+		surface_util.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
 
 		clone_tile_param.destination_surface = surface
 		local step = 1
@@ -162,9 +176,9 @@ end
 ---@param resource_name string
 ---@param amount uint
 ---@param clone_area_param? LuaSurface.clone_area_param
-M.fill_box_with_resources = function(surface, x, y, size, resource_name, amount, clone_area_param)
+function surface_util.fill_box_with_resources(surface, x, y, size, resource_name, amount, clone_area_param)
 	if size <= 7 then
-		M.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
+		surface_util.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
 	end
 	if amount == nil then
 		error("amount is nil")
@@ -269,14 +283,14 @@ end
 ---@param size integer
 ---@param resource_name string
 ---@param amount uint
-M.fill_box_with_resources_safely = function(surface, x, y, size, resource_name, amount)
+function surface_util.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
 	if size > 7 then
 		local temp_surface = global.ZO_surface_for_cloning
 		if temp_surface == nil then
 			temp_surface = game.create_surface("ZO_surface_for_cloning", {width = 1, height = 1})
 			global.ZO_surface_for_cloning = temp_surface
 		end
-		M.fill_box_with_resources(surface, x, y, size, resource_name, amount)
+		surface_util.fill_box_with_resources(surface, x, y, size, resource_name, amount)
 		tile_source_left_top.x = 0
 		tile_source_left_top.y = 0 - size
 		tile_source_right_bottom.x = 0 + size
@@ -316,7 +330,7 @@ end
 ---@param find_param LuaSurface.find_tiles_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_tiles_vertically_and_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_tiles_vertically_and_horizontally(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 1
 	local y_diff = -1
 	local left_top_x = find_param.area.left_top.x
@@ -359,7 +373,7 @@ end
 ---@param find_param LuaSurface.find_entities_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_entities_vertically_and_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_entities_vertically_and_horizontally(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 1
 	local y_diff = -1
 	local left_top_x = find_param.area.left_top.x
@@ -396,7 +410,7 @@ end
 ---@param find_param LuaSurface.find_entities_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_entities_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_entities_horizontally(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 1
 	local y_diff = 0
 	local left_top_x = find_param.area.left_top.x
@@ -430,7 +444,7 @@ end
 ---@param find_param LuaSurface.find_tiles_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_tiles_horizontally = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_tiles_horizontally(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 1
 	local y_diff = 0
 	local left_top_x = find_param.area.left_top.x
@@ -469,7 +483,7 @@ end
 ---@param find_param LuaSurface.find_tiles_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_tiles_vertically = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_tiles_vertically(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 0
 	local y_diff = -1
 	local left_top_x = find_param.area.left_top.x
@@ -508,7 +522,7 @@ end
 ---@param find_param LuaSurface.find_entities_filtered_param -- {area={left_top = {x = 0, y = 0}, right_bottom = {x = 0, y = 0}}}
 ---@param destination_left_top Vector?  -- {x = 0, y = 0}
 ---@param destination_surface LuaSurface?
-M.flip_entities_vertically = function(surface, find_param, destination_left_top, destination_surface)
+function surface_util.flip_entities_vertically(surface, find_param, destination_left_top, destination_surface)
 	local x_diff = 0
 	local y_diff = -1
 	local left_top_x = find_param.area.left_top.x
@@ -537,4 +551,4 @@ M.flip_entities_vertically = function(surface, find_param, destination_left_top,
 end
 
 
-return M
+return surface_util

@@ -1,11 +1,20 @@
 ---@class ZOinventory
-local inventory_util = {}
+local inventory_util = {build = 1}
+
+
+--[[
+inventory_util.copy_inventory_items_safely(source_inventory, reciever_inventory): boolean
+inventory_util.copy_inventory_items(source_inventory, reciever_inventory): boolean
+inventory_util.copy_inventory_items_to_player(source_inventory, player): boolean
+inventory_util.insert_items_safely(reciever, items)
+inventory_util.remove_items_safely(reciever, items)
+]]
 
 
 ---@param source_inventory LuaInventory
 ---@param reciever_inventory LuaInventory
 ---@return boolean
-inventory_util.copy_inventory_items_safely = function(source_inventory, reciever_inventory)
+function inventory_util.copy_inventory_items_safely(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -31,7 +40,7 @@ end
 ---@param source_inventory LuaInventory
 ---@param reciever_inventory LuaInventory
 ---@return boolean
-inventory_util.copy_inventory_items = function(source_inventory, reciever_inventory)
+function inventory_util.copy_inventory_items(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -53,7 +62,7 @@ end
 ---@param source_inventory LuaInventory
 ---@param player LuaPlayer
 ---@return boolean
-inventory_util.copy_inventory_items_to_player = function(source_inventory, player)
+function inventory_util.copy_inventory_items_to_player(source_inventory, player)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
@@ -87,7 +96,7 @@ end
 
 ---@param reciever LuaInventory|LuaEntity
 ---@param items table[]
-inventory_util.insert_items_safely = function(reciever, items)
+function inventory_util.insert_items_safely(reciever, items)
 	local item_prototypes = game.item_prototypes
 	for i=1, #items do
 		local item_data = items[i]
@@ -100,7 +109,7 @@ end
 
 ---@param reciever LuaInventory|LuaEntity
 ---@param items table[]
-inventory_util.remove_items_safely = function(reciever, items)
+function inventory_util.remove_items_safely(reciever, items)
 	local item_prototypes = game.item_prototypes
 	for i=1, #items do
 		local item_data = items[i]

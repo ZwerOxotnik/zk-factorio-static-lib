@@ -118,7 +118,7 @@ script.on_configuration_changed(function(data)
 end)
 
 
-local handler = {}
+local handler = {build = 1}
 
 handler.add_lib = function(lib)
   for _, current in pairs(libraries) do
