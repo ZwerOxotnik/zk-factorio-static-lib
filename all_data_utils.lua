@@ -4,7 +4,7 @@ local zo_utils = {}
 
 do
 	local util_pathes = {
-		"locale", "time-util", "lauxlib"
+		"locale", "time-util", "lauxlib", "number-util"
 	}
 	for _, path in ipairs(util_pathes) do
 		for k, v in pairs(require(path)) do
