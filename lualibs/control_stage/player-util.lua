@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 1}
+local player_util = {build = 2}
 
 
 --[[
@@ -11,6 +11,8 @@ player_util.create_new_character(player, character_name?)
 player_util.teleport_players(players, surface, position): boolean
 player_util.teleport_players_safely(players, surface, position): boolean
 player_util.print_to_players(players, message, color?): boolean
+player_util.emulate_message_to_server(player, message)
+player_util.delete_gui_for_players(players, source_gui_name, gui_name)
 ]]
 
 
@@ -208,6 +210,30 @@ function player_util.print_to_players(players, message, color)
 		end
 	end
 	return true
+end
+
+
+---@param player LuaPlayer
+---@param message string
+function player_util.emulate_message_to_server(player, message)
+	if type(message) == "string" then
+		print("0000/00/00 00:00:00 [CHAT] " .. player.name .. " " .. player.tag .. ": " .. message)
+	end
+end
+
+
+---@param players table<any, LuaPlayer>
+---@param source_gui_name string
+---@param gui_name string
+function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
+	for _, player in pairs(players) do
+		if player.valid then
+			local gui = player.gui[source_gui_name][gui_name]
+			if gui and gui.valid then
+				gui.destroy()
+			end
+		end
+	end
 end
 
 
