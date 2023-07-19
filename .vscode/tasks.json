@@ -1,0 +1,19 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Luacheck",
+			"type": "shell",
+			"command": "luacheck",
+			"args": ["${file}"],
+			"group": "test"
+		},
+		{
+			"label": "Candran to Lua",
+			"type": "shell",
+			"command": "lua",
+			"args": [".scripts/CandranToLua.lua"],
+			"group": "build"
+		}
+	]
+}
