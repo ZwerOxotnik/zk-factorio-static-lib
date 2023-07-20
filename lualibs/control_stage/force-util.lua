@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 4}
+local force_util = {build = 5}
 
 
 --[[
@@ -9,6 +9,8 @@ force_util.research_techs_safely(force, techs)
 force_util.research_enabled_techs_safely(force, techs)
 force_util.research_techs_by_regex(force, regex)
 force_util.research_enabled_techs_by_regex(force, regex)
+force_util.research_techs_by_items(force, items, max_research_unit_count?)
+force_util.research_enabled_techs_by_items(force, items, max_research_unit_count?)
 force_util.count_techs(force): integer, integer, number
 force_util.print_to_forces(forces, message, color?): boolean
 force_util.get_diplomacy_stance(force, other_force): 1|0|-1
@@ -63,6 +65,20 @@ end
 
 
 ---@param force LuaForce
+---@param techs string[]
+function force_util.research_enabled_techs_safely(force, techs)
+	local technologies = force.technologies
+	for i=1, #techs do
+		local tech_name = techs[i]
+		local tech = technologies[tech_name]
+		if tech and tech.enabled then
+			tech.researched = true
+		end
+	end
+end
+
+
+---@param force LuaForce
 ---@param regex string
 function force_util.research_techs_by_regex(force, regex)
 	for _, tech in pairs(force.technologies) do
@@ -77,7 +93,7 @@ end
 ---@param regex string
 function force_util.research_enabled_techs_by_regex(force, regex)
 	for _, tech in pairs(force.technologies) do
-		if tech.name:find(regex) then
+		if tech.name:find(regex) and tech.enabled then
 			tech.researched = true
 		end
 	end
@@ -85,14 +101,60 @@ end
 
 
 ---@param force LuaForce
----@param techs string[]
-function force_util.research_enabled_techs_safely(force, techs)
-	local technologies = force.technologies
-	for i=1, #techs do
-		local tech_name = techs[i]
-		local tech = technologies[tech_name]
-		if tech and tech.enabled then
+---@param items string[]
+---@param max_research_unit_count integer?
+function force_util.research_techs_by_items(force, items, max_research_unit_count)
+	for _, tech in pairs(force.technologies) do
+		for _, ingredient in pairs(tech.research_unit_ingredients) do
+			if ingredient.type ~= "item" then
+				goto skip_tech
+			end
+			local is_valid = false
+			local ingredient_name = ingredient.name
+			local unit_count = tech.research_unit_count
+			for i=1, #items do
+				local item_name = items[i]
+				if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
+					is_valid = true
+					break
+				end
+			end
+			if not is_valid then
+				goto skip_tech
+			end
+		end
+		tech.researched = true
+		:: skip_tech ::
+	end
+end
+
+
+---@param force LuaForce
+---@param items string[]
+---@param max_research_unit_count integer?
+function force_util.research_enabled_techs_by_items(force, items, max_research_unit_count)
+	for _, tech in pairs(force.technologies) do
+		if tech.enabled then
+			for _, ingredient in pairs(tech.research_unit_ingredients) do
+				if ingredient.type ~= "item" then
+					goto skip_tech
+				end
+				local is_valid = false
+				local ingredient_name = ingredient.name
+				local unit_count = tech.research_unit_count
+				for i=1, #items do
+					local item_name = items[i]
+					if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
+						is_valid = true
+						break
+					end
+				end
+				if not is_valid then
+					goto skip_tech
+				end
+			end
 			tech.researched = true
+			:: skip_tech ::
 		end
 	end
 end
