@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 3}
+local force_util = {build = 4}
 
 
 --[[
@@ -66,7 +66,7 @@ end
 ---@param regex string
 function force_util.research_techs_by_regex(force, regex)
 	for _, tech in pairs(force.technologies) do
-		if tech:find(regex) then
+		if tech.name:find(regex) then
 			tech.researched = true
 		end
 	end
@@ -77,7 +77,7 @@ end
 ---@param regex string
 function force_util.research_enabled_techs_by_regex(force, regex)
 	for _, tech in pairs(force.technologies) do
-		if tech:find(regex) then
+		if tech.name:find(regex) then
 			tech.researched = true
 		end
 	end
