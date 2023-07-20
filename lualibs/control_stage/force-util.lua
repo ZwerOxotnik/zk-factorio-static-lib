@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 2}
+local force_util = {build = 3}
 
 
 --[[
@@ -7,6 +7,8 @@ force_util.change_techs_safely(force, techs, field_name, value)
 force_util.change_enabled_techs_safely(force, techs, field_name, value)
 force_util.research_techs_safely(force, techs)
 force_util.research_enabled_techs_safely(force, techs)
+force_util.research_techs_by_regex(force, regex)
+force_util.research_enabled_techs_by_regex(force, regex)
 force_util.count_techs(force): integer, integer, number
 force_util.print_to_forces(forces, message, color?): boolean
 force_util.get_diplomacy_stance(force, other_force): 1|0|-1
@@ -58,6 +60,29 @@ function force_util.research_techs_safely(force, techs)
 		end
 	end
 end
+
+
+---@param force LuaForce
+---@param regex string
+function force_util.research_techs_by_regex(force, regex)
+	for _, tech in pairs(force.technologies) do
+		if tech:find(regex) then
+			tech.researched = true
+		end
+	end
+end
+
+
+---@param force LuaForce
+---@param regex string
+function force_util.research_enabled_techs_by_regex(force, regex)
+	for _, tech in pairs(force.technologies) do
+		if tech:find(regex) then
+			tech.researched = true
+		end
+	end
+end
+
 
 ---@param force LuaForce
 ---@param techs string[]
