@@ -1,12 +1,11 @@
 ---@class ZOentity_util
-local entity_util = {build = 3}
+local entity_util = {build = 4}
 
 
 --[[
 entity_util.transfer_items(source, items, destination): integer
 entity_util.pick_random_entity_with_heath(entities, tries): LuaEntity?
 entity_util.check_entity_shield(entity): integer?, integer?, number?	-- shield, max_shield, shield_ratio
-entity_util.disconnect_wires(entity)
 entity_util.disconnect_not_own_wires(entity)
 entity_util.disconnect_not_friendly_wires(entity)
 ]]
@@ -66,16 +65,6 @@ function entity_util.check_entity_shield(entity)
 	end
 
 	return shield, max_shield, shield / max_shield
-end
-
-
----@param entity LuaEntity
-function entity_util.disconnect_wires(entity)
-	local neighbours = entity.neighbours["copper"]
-	local disconnect_neighbour = entity.disconnect_neighbour
-	for i=1, #neighbours do
-		disconnect_neighbour(neighbours[i])
-	end
 end
 
 
