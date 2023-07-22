@@ -9,7 +9,8 @@ do
 --#	"number-util", "locale", "time-util", "lauxlib", "coordinates-util",
 --#	"control_stage/force-util", "control_stage/entity-util",
 --#	"control_stage/player-util", "control_stage/market-util",
---#	"control_stage/inventory-util", "control_stage/surface-util"
+--#	"control_stage/inventory-util", "control_stage/surface-util",
+--# "control_stage/prototype-util"
 --#}
 --#for i, path in ipairs(util_paths) do
 --#	write(string.format("	util = require(\"lualibs/%s\")", path))
