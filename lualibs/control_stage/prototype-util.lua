@@ -10,8 +10,8 @@ prototype_util.get_recipes_by_item_ingredient(item_name): LuaCustomTable<string,
 prototype_util.get_recipes_by_item_product(item_name): LuaCustomTable<string, LuaRecipePrototype>
 prototype_util.get_recipes_by_fluid_ingredient(ingredient_name): LuaCustomTable<string, LuaRecipePrototype>
 prototype_util.get_recipes_by_fluid_product(ingredient_name): LuaCustomTable<string, LuaRecipePrototype>
-prototype_util.get_recipes_by_ingredient_and_its_successors(Product|Ingredient, depth): LuaRecipePrototype[]
-prototype_util.get_recipes_by_product_and_its_predecessors(Product|Ingredient, depth): LuaRecipePrototype[]
+prototype_util.get_recipes_by_ingredient_and_its_successors(Product|Ingredient, depth=1): LuaRecipePrototype[]
+prototype_util.get_recipes_by_product_and_its_predecessors(Product|Ingredient,  depth=1): LuaRecipePrototype[]
 prototype_util.get_result_recipes_by_entity_name(entity_name): LuaCustomTable<string, LuaRecipePrototype>
 ]]
 
