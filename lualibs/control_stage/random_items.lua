@@ -6,7 +6,7 @@ local random_items = {build = 1}
 
 
 --[[
-module.insert_random_item(receiver, count?)
+random_items.insert_random_item(receiver, count?)
 random_items.on_init()
 random_items.on_load()
 random_items.on_configuration_changed()
