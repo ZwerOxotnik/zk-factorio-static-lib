@@ -1,5 +1,5 @@
 ---@class ZObiter_util
-local biter_util = {build = 1}
+local biter_util = {build = 2}
 
 
 --[[
@@ -15,8 +15,8 @@ function biter_util.use_default_evolution()
 		return
 	end
 
-	if global.default_settings then
-		enemy.evolution_factor = global.default_settings.default_evolution_factor or 0
+	if global.zo_default_settings then
+		enemy.evolution_factor = global.zo_default_settings.default_evolution_factor or 0
 		return
 	end
 
@@ -32,15 +32,15 @@ function biter_util.set_default_evolution(evolution_factor)
 			value = evolution_factor * 100
 		}
 
-		local default_settings = global.default_settings
+		local default_settings = global.zo_default_settings
 		if default_settings and default_settings.default_evolution_factor then
 			default_settings.default_evolution_factor = evolution_factor
 		end
 		return
 	end
 
-	global.default_settings = global.default_settings or {}
-	global.default_settings.default_evolution_factor = evolution_factor
+	global.zo_default_settings = global.zo_default_settings or {}
+	global.zo_default_settings.default_evolution_factor = evolution_factor
 end
 
 
