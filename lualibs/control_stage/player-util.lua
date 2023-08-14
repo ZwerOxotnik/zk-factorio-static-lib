@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 2}
+local player_util = {build = 3}
 
 
 --[[
@@ -215,9 +215,20 @@ end
 
 ---@param player LuaPlayer
 ---@param message string
+---@return string?
 function player_util.emulate_message_to_server(player, message)
 	if type(message) == "string" then
-		print("0000/00/00 00:00:00 [CHAT] " .. player.name .. " " .. player.tag .. ": " .. message)
+
+		local _message
+		local tag = player.tag
+		if tag and tag ~= "" then
+			_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. " " .. player.tag .. ": " .. _message
+		else
+			_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. ": " .. _message
+		end
+		print(_message)
+		log(_message)
+		return _message
 	end
 end
 
