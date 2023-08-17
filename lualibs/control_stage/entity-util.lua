@@ -1,16 +1,21 @@
 ---@class ZOentity_util
-local entity_util = {build = 4}
+local entity_util = {build = 5}
 
 
 --[[
 entity_util.transfer_items(source, items, destination): integer
 entity_util.pick_random_entity_with_heath(entities, tries): LuaEntity?
-entity_util.check_entity_shield(entity): integer?, integer?, number?	-- shield, max_shield, shield_ratio
+entity_util.check_entity_shield(entity): integer?, integer?, number? -- shield, max_shield, shield_ratio
 entity_util.disconnect_not_own_wires(entity)
 entity_util.disconnect_not_friendly_wires(entity)
+entity_util.find_entities(filter_param, surfaces?, surface_blacklist?): table<uint, LuaEntity[]>
+entity_util.count_entities(filter_param, surfaces?, surface_blacklist?): integer
+entity_util.destroy_entities(filter_param, surfaces?, surface_blacklist?)
 ]]
 
 
+---@type LuaEntity.destroy_param
+local DESTROY_PARAM = {raise_destroy = true}
 local random = math.random
 
 
@@ -109,6 +114,100 @@ function entity_util.disconnect_not_friendly_wires(entity)
 			end
 		end
 	end
+end
+
+
+---@param filter_param LuaSurface.find_entities_filtered_param
+---@param surfaces LuaCustomTable<any, LuaSurface> | table<any, LuaSurface>? # game.surfaces by default
+---@param surface_blacklist table<LuaSurface, any>?
+---@return table<uint, LuaEntity[]>
+function entity_util.find_entities(filter_param, surfaces, surface_blacklist)
+	surfaces = surfaces or game.surfaces
+	local group_entities = {}
+
+	if surface_blacklist == nil then
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			if #entities > 0 then
+				group_entities[#group_entities+1] = entities
+			end
+			::continue::
+		end
+	else
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			if surface_blacklist[surface] then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			if #entities > 0 then
+				group_entities[#group_entities+1] = entities
+			end
+			::continue::
+		end
+	end
+
+	return group_entities
+end
+
+
+---@param filter_param LuaSurface.find_entities_filtered_param
+---@param surfaces LuaCustomTable<any, LuaSurface> | table<any, LuaSurface>? # game.surfaces by default
+---@param surface_blacklist table<LuaSurface, any>?
+---@return integer
+function entity_util.count_entities(filter_param, surfaces, surface_blacklist)
+	surfaces = surfaces or game.surfaces
+	local count = 0
+
+	if surface_blacklist == nil then
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			count = count + #entities
+			::continue::
+		end
+	else
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			if surface_blacklist[surface] then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			count = count + #entities
+			::continue::
+		end
+	end
+
+	return count
+end
+
+
+---@param filter_param LuaSurface.find_entities_filtered_param
+---@param surfaces LuaCustomTable<any, LuaSurface> | table<any, LuaSurface>? # game.surfaces by default
+---@param surface_blacklist table<LuaSurface, any>?
+function entity_util.destroy_entities(filter_param, surfaces, surface_blacklist)
+	surfaces = surfaces or game.surfaces
+	local group_entities = {}
+
+	if surface_blacklist == nil then
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			for i = #entities, 1, -1 do
+				entities[i].destroy(DESTROY_PARAM)
+			end
+			::continue::
+		end
+	else
+		for _, surface in pairs(surfaces) do
+			if not surface.valid then goto continue end
+			if surface_blacklist[surface] then goto continue end
+			local entities = surface.find_entities_filtered(filter_param)
+			for i = #entities, 1, -1 do
+				entities[i].destroy(DESTROY_PARAM)
+			end
+			::continue::
+		end
+	end
+
+	return group_entities
 end
 
 
