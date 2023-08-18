@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 4}
+local player_util = {build = 5}
 
 
 --[[
@@ -8,14 +8,14 @@ player_util.get_resource_position_for_player(player): MapPosition?
 player_util.teleport_safely(player, surface, target_position): boolean
 player_util.delete_character(player)
 player_util.create_new_character(player, character_name?)
-player_util.teleport_players(players, surface, position): boolean
-player_util.teleport_players_safely(players, surface, position): boolean
-player_util.print_to_players(players, message, color?): boolean
+player_util.teleport_players(players=game.players, surface, position): boolean
+player_util.teleport_players_safely(players=game.players, surface, position): boolean
+player_util.print_to_players(players=game.players, message, color?): boolean
 player_util.emulate_message_to_server(player, message, is_log?)
-player_util.delete_gui_for_players(players, source_gui_name, gui_name)
-player_util.find_closest_player_to_position(players, position): LuaPlayer?, uint?
-player_util.find_players_in_radius(players, position, radius): LuaPlayer[]
-player_util.is_there_player_in_radius(players, position, radius): boolean
+player_util.delete_gui_for_players(players=game.players, source_gui_name, gui_name)
+player_util.find_closest_player_to_position(players=game.players, position): LuaPlayer?, uint?
+player_util.find_players_in_radius(players=game.players, position, radius): LuaPlayer[]
+player_util.is_there_player_in_radius(players=game.players, position, radius): boolean
 ]]
 
 
@@ -143,11 +143,12 @@ function player_util.create_new_character(player, character_name)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param surface LuaSurface
 ---@param position MapPosition
 ---@return boolean
 function player_util.teleport_players(players, surface, position)
+	players = players or game.players
 	if position == nil then
 		return false
 	end
@@ -177,11 +178,12 @@ function player_util.teleport_players(players, surface, position)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param surface LuaSurface
 ---@param position MapPosition
 ---@return boolean
 function player_util.teleport_players_safely(players, surface, position)
+	players = players or game.players
 	if position == nil then
 		return false
 	end
@@ -198,11 +200,12 @@ function player_util.teleport_players_safely(players, surface, position)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param message table|string
 ---@param color table?
 ---@return boolean
 function player_util.print_to_players(players, message, color)
+	players = players or game.players
 	if message == nil then
 		return false
 	end
@@ -241,10 +244,11 @@ function player_util.emulate_message_to_server(player, message, is_log)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param source_gui_name string
 ---@param gui_name string
 function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
+	players = players or game.players
 	for _, player in pairs(players) do
 		if player.valid then
 			local gui = player.gui[source_gui_name][gui_name]
@@ -256,10 +260,11 @@ function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param position MapPosition
 ---@return LuaPlayer?, uint? # player, distance
 function player_util.find_closest_player_to_position(players, position)
+	players = players or game.players
 	local min_distance
 	local closest_player
 	for _, player in pairs(players) do
@@ -280,10 +285,11 @@ function player_util.find_closest_player_to_position(players, position)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>?? # game.players by default
 ---@param position MapPosition
 ---@return LuaPlayer[]
 function player_util.find_players_in_radius(players, position, radius)
+	players = players or game.players
 	local players_in_radius = {}
 	for _, player in pairs(players) do
 		if player.valid then
@@ -302,10 +308,11 @@ function player_util.find_players_in_radius(players, position, radius)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
 ---@param position MapPosition
 ---@return boolean
 function player_util.is_there_player_in_radius(players, position, radius)
+	players = players or game.players
 	for _, player in pairs(players) do
 		if player.valid then
 			local pos = player.position
