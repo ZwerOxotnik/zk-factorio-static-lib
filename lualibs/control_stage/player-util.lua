@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 3}
+local player_util = {build = 4}
 
 
 --[[
@@ -11,8 +11,11 @@ player_util.create_new_character(player, character_name?)
 player_util.teleport_players(players, surface, position): boolean
 player_util.teleport_players_safely(players, surface, position): boolean
 player_util.print_to_players(players, message, color?): boolean
-player_util.emulate_message_to_server(player, message)
+player_util.emulate_message_to_server(player, message, is_log?)
 player_util.delete_gui_for_players(players, source_gui_name, gui_name)
+player_util.find_closest_player_to_position(players, position): LuaPlayer?, uint?
+player_util.find_players_in_radius(players, position, radius): LuaPlayer[]
+player_util.is_there_player_in_radius(players, position, radius): boolean
 ]]
 
 
@@ -140,7 +143,7 @@ function player_util.create_new_character(player, character_name)
 end
 
 
----@param players table<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
 ---@param surface LuaSurface
 ---@param position MapPosition
 ---@return boolean
@@ -174,7 +177,7 @@ function player_util.teleport_players(players, surface, position)
 end
 
 
----@param players table<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
 ---@param surface LuaSurface
 ---@param position MapPosition
 ---@return boolean
@@ -195,7 +198,7 @@ function player_util.teleport_players_safely(players, surface, position)
 end
 
 
----@param players table<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
 ---@param message table|string
 ---@param color table?
 ---@return boolean
@@ -215,10 +218,10 @@ end
 
 ---@param player LuaPlayer
 ---@param message string
+---@param is_log boolean?
 ---@return string?
-function player_util.emulate_message_to_server(player, message)
+function player_util.emulate_message_to_server(player, message, is_log)
 	if type(message) == "string" then
-
 		local _message
 		local tag = player.tag
 		if tag and tag ~= "" then
@@ -226,14 +229,19 @@ function player_util.emulate_message_to_server(player, message)
 		else
 			_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. ": " .. _message
 		end
-		print(_message)
-		log(_message)
+
+		if is_log then
+			log("\r\n" .. _message)
+		else
+			print(_message)
+		end
+
 		return _message
 	end
 end
 
 
----@param players table<any, LuaPlayer>
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
 ---@param source_gui_name string
 ---@param gui_name string
 function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
@@ -245,6 +253,73 @@ function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
 			end
 		end
 	end
+end
+
+
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param position MapPosition
+---@return LuaPlayer?, uint? # player, distance
+function player_util.find_closest_player_to_position(players, position)
+	local min_distance
+	local closest_player
+	for _, player in pairs(players) do
+		if player.valid then
+			local pos = player.position
+			local stop_x = position.x or position[1]
+			local stop_y = position.y or position[2]
+			local xdiff = pos.x - stop_x
+			local ydiff = pos.y - stop_y
+			local distance = (xdiff * xdiff + ydiff * ydiff)^0.5
+			if min_distance == nil or min_distance < distance then
+				min_distance = distance --[[@as uint]]
+				closest_player = player
+			end
+		end
+	end
+	return closest_player, min_distance
+end
+
+
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param position MapPosition
+---@return LuaPlayer[]
+function player_util.find_players_in_radius(players, position, radius)
+	local players_in_radius = {}
+	for _, player in pairs(players) do
+		if player.valid then
+			local pos = player.position
+			local stop_x = position.x or position[1]
+			local stop_y = position.y or position[2]
+			local xdiff = pos.x - stop_x
+			local ydiff = pos.y - stop_y
+			local distance = (xdiff * xdiff + ydiff * ydiff)^0.5
+			if distance <= radius then
+				players_in_radius[#players_in_radius+1] = player
+			end
+		end
+	end
+	return players_in_radius
+end
+
+
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>
+---@param position MapPosition
+---@return boolean
+function player_util.is_there_player_in_radius(players, position, radius)
+	for _, player in pairs(players) do
+		if player.valid then
+			local pos = player.position
+			local stop_x = position.x or position[1]
+			local stop_y = position.y or position[2]
+			local xdiff = pos.x - stop_x
+			local ydiff = pos.y - stop_y
+			local distance = (xdiff * xdiff + ydiff * ydiff)^0.5
+			if distance <= radius then
+				return true
+			end
+		end
+	end
+	return false
 end
 
 
