@@ -8,9 +8,9 @@ entity_util.pick_random_entity_with_heath(entities, tries): LuaEntity?
 entity_util.check_entity_shield(entity): integer?, integer?, number? -- shield, max_shield, shield_ratio
 entity_util.disconnect_not_own_wires(entity)
 entity_util.disconnect_not_friendly_wires(entity)
-entity_util.find_entities(filter_param, surfaces?, surface_blacklist?): table<uint, LuaEntity[]>
-entity_util.count_entities(filter_param, surfaces?, surface_blacklist?): integer
-entity_util.destroy_entities(filter_param, surfaces?, surface_blacklist?)
+entity_util.find_entities(filter_param, surfaces=game.surfaces, surface_blacklist?): table<uint, LuaEntity[]>
+entity_util.count_entities(filter_param, surfaces=game.surfaces, surface_blacklist?): integer
+entity_util.destroy_entities(filter_param, surfaces=game.surfaces, surface_blacklist?)
 ]]
 
 
