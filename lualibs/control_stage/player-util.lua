@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 5}
+local player_util = {build = 6}
 
 
 --[[
@@ -13,9 +13,9 @@ player_util.teleport_players_safely(players=game.players, surface, position): bo
 player_util.print_to_players(players=game.players, message, color?): boolean
 player_util.emulate_message_to_server(player, message, is_log?)
 player_util.delete_gui_for_players(players=game.players, source_gui_name, gui_name)
-player_util.find_closest_player_to_position(players=game.players, position): LuaPlayer?, uint?
-player_util.find_players_in_radius(players=game.players, position, radius): LuaPlayer[]
-player_util.is_there_player_in_radius(players=game.players, position, radius): boolean
+player_util.find_closest_player_to_position(players=game.connected_players, position): LuaPlayer?, uint?
+player_util.find_players_in_radius(players=game.connected_players, position, radius): LuaPlayer[]
+player_util.is_there_player_in_radius(players=game.connected_players, position, radius): boolean
 ]]
 
 
@@ -264,7 +264,7 @@ end
 ---@param position MapPosition
 ---@return LuaPlayer?, uint? # player, distance
 function player_util.find_closest_player_to_position(players, position)
-	players = players or game.players
+	players = players or game.connected_players
 	local min_distance
 	local closest_player
 	for _, player in pairs(players) do
@@ -289,7 +289,7 @@ end
 ---@param position MapPosition
 ---@return LuaPlayer[]
 function player_util.find_players_in_radius(players, position, radius)
-	players = players or game.players
+	players = players or game.connected_players
 	local players_in_radius = {}
 	for _, player in pairs(players) do
 		if player.valid then
@@ -312,7 +312,7 @@ end
 ---@param position MapPosition
 ---@return boolean
 function player_util.is_there_player_in_radius(players, position, radius)
-	players = players or game.players
+	players = players or game.connected_players
 	for _, player in pairs(players) do
 		if player.valid then
 			local pos = player.position
