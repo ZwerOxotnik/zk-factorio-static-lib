@@ -1,5 +1,5 @@
 ---@class ZOprototype_util
-local prototype_util = {build = 5}
+local prototype_util = {build = 6}
 
 
 --[[
@@ -16,6 +16,7 @@ prototype_util.get_recipes_and_its_successors_by_ingredient(Product|Ingredient|t
 prototype_util.get_recipes_and_its_predecessors_by_product( Product|Ingredient|table, depth=1): LuaRecipePrototype[]
 prototype_util.get_result_recipes_by_entity_name(entity_name): LuaCustomTable<string, LuaRecipePrototype>
 prototype_util.find_min_max_turret_range(prototypes?): uint, uint -- min, max
+prototype_util.find_biggest_chest(prototypes?): LuaEntityPrototype, uint -- prototype, inventory_size
 ]]
 
 
@@ -280,6 +281,7 @@ function prototype_util.find_min_max_turret_range(prototypes)
 	prototypes = prototypes or game.get_filtered_entity_prototypes{
 		{filter="turret"}
 	}
+
 	for _, prototype in pairs(prototypes) do
 		if prototype.turret_range > max_turret_range then
 			max_turret_range = prototype.turret_range --[[@as uint]]
@@ -288,7 +290,34 @@ function prototype_util.find_min_max_turret_range(prototypes)
 			min_turret_range = prototype.turret_range --[[@as uint]]
 		end
 	end
+
 	return (min_turret_range or 0), max_turret_range
+end
+
+
+-- TODO: improve with mods
+---@param prototypes LuaCustomTable<any, LuaEntityPrototype> | table<any, LuaEntityPrototype>?
+---@return LuaEntityPrototype?, uint? # prototype?, size?
+function prototype_util.find_biggest_chest(prototypes)
+	local selected_prototype
+	local max_inventory_size = 0
+	prototypes = prototypes or game.get_filtered_entity_prototypes{
+		{filter="type", type="container"}
+	}
+
+	for _, prototype in pairs(prototypes) do
+		if not prototype.selectable_in_game then goto continue end
+		local inventory_size = prototype.get_inventory_size(defines.inventory.chest)
+		if inventory_size > max_inventory_size then
+			selected_prototype = prototype
+			max_inventory_size = inventory_size --[[@as uint]]
+		end
+		::continue::
+	end
+
+	if selected_prototype then
+		return selected_prototype, max_inventory_size
+	end
 end
 
 
