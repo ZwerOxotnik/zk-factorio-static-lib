@@ -1,5 +1,5 @@
 ---@class ZOprototype_util
-local prototype_util = {build = 4}
+local prototype_util = {build = 5}
 
 
 --[[
@@ -15,6 +15,7 @@ prototype_util.get_recipes_predecessors(LuaRecipe|LuaRecipePrototype|table, dept
 prototype_util.get_recipes_and_its_successors_by_ingredient(Product|Ingredient|table, depth=1): LuaRecipePrototype[]
 prototype_util.get_recipes_and_its_predecessors_by_product( Product|Ingredient|table, depth=1): LuaRecipePrototype[]
 prototype_util.get_result_recipes_by_entity_name(entity_name): LuaCustomTable<string, LuaRecipePrototype>
+prototype_util.find_min_max_turret_range(prototypes?): uint, uint -- min, max
 ]]
 
 
@@ -268,6 +269,26 @@ function prototype_util.get_result_recipes_by_entity_name(entity_name)
 	return game.get_filtered_recipe_prototypes{{
 		filter = "has-product-item", elem_filters = {{filter = "place-result", elem_filters = elem_filters}}
 	}}
+end
+
+
+---@param prototypes LuaCustomTable<any, LuaEntityPrototype> | table<any, LuaEntityPrototype>?
+---@return uint, uint # min, max
+function prototype_util.find_min_max_turret_range(prototypes)
+	local max_turret_range = 0
+	local min_turret_range
+	prototypes = prototypes or game.get_filtered_entity_prototypes{
+		{filter="turret"}
+	}
+	for _, prototype in pairs(prototypes) do
+		if prototype.turret_range > max_turret_range then
+			max_turret_range = prototype.turret_range --[[@as uint]]
+		end
+		if min_turret_range == nil or prototype.turret_range < min_turret_range then
+			min_turret_range = prototype.turret_range --[[@as uint]]
+		end
+	end
+	return (min_turret_range or 0), max_turret_range
 end
 
 
