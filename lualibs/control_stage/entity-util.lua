@@ -150,7 +150,7 @@ function entity_util.find_entities(filter_param, surfaces, surface_blacklist)
 end
 
 
----@param filter_param LuaSurface.find_entities_filtered_param
+---@param filter_param LuaSurface.count_entities_filtered_param
 ---@param surfaces LuaCustomTable<any, LuaSurface> | table<any, LuaSurface>? # game.surfaces by default
 ---@param surface_blacklist table<uint, any>? # key as surface index
 ---@return integer
