@@ -1,5 +1,5 @@
 ---@class ZOentity_util
-local entity_util = {build = 6}
+local entity_util = {build = 7}
 
 
 --[[
@@ -161,16 +161,14 @@ function entity_util.count_entities(filter_param, surfaces, surface_blacklist)
 	if surface_blacklist == nil then
 		for _, surface in pairs(surfaces) do
 			if not surface.valid then goto continue end
-			local entities = surface.find_entities_filtered(filter_param)
-			count = count + #entities
+			count = count + surface.count_entities_filtered(filter_param)
 			::continue::
 		end
 	else
 		for _, surface in pairs(surfaces) do
 			if not surface.valid then goto continue end
 			if surface_blacklist[surface.index] then goto continue end
-			local entities = surface.find_entities_filtered(filter_param)
-			count = count + #entities
+			count = count + surface.count_entities_filtered(filter_param)
 			::continue::
 		end
 	end
