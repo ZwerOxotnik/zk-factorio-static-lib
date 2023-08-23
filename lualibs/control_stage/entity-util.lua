@@ -1,11 +1,12 @@
 ---@class ZOentity_util
-local entity_util = {build = 7}
+local entity_util = {build = 8}
 
 
 --[[
 entity_util.transfer_items(source, items, destination): integer
 entity_util.pick_random_entity_with_heath(entities, tries): LuaEntity?
 entity_util.check_entity_shield(entity): integer?, integer?, number? -- shield, max_shield, shield_ratio
+entity_util.disconnect_wires_by_force(entity, target_force)
 entity_util.disconnect_not_own_wires(entity)
 entity_util.disconnect_not_friendly_wires(entity)
 entity_util.find_entities(filter_param, surfaces=game.surfaces, surface_blacklist?): table<uint, LuaEntity[]>
@@ -74,13 +75,14 @@ end
 
 
 ---@param entity LuaEntity
-function entity_util.disconnect_not_own_wires(entity)
-	local force = entity.force
-	local neighbours = entity.neighbours["copper"]
+---@param target_force LuaForce
+---@param wire_type_name string? # "copper" by default
+function entity_util.disconnect_wires_by_force(entity, target_force, wire_type_name)
+	local neighbours = entity.neighbours[(wire_type_name or "copper")]
 	local disconnect_neighbour = entity.disconnect_neighbour
 	for i=1, #neighbours do
 		local neighbour = neighbours[i]
-		if force ~= neighbour.force then
+		if neighbour.force == target_force then
 			disconnect_neighbour(neighbour)
 		end
 	end
@@ -88,23 +90,39 @@ end
 
 
 ---@param entity LuaEntity
-function entity_util.disconnect_not_friendly_wires(entity)
-	local force = entity.force
-	local neighbours = entity.neighbours["copper"]
+---@param wire_type_name string? # "copper" by default
+function entity_util.disconnect_not_own_wires(entity, wire_type_name)
+	local entity_force = entity.force
+	local neighbours = entity.neighbours[(wire_type_name or "copper")]
+	local disconnect_neighbour = entity.disconnect_neighbour
+	for i=1, #neighbours do
+		local neighbour = neighbours[i]
+		if entity_force ~= neighbour.force then
+			disconnect_neighbour(neighbour)
+		end
+	end
+end
+
+
+---@param entity LuaEntity
+---@param wire_type_name string? # "copper" by default
+function entity_util.disconnect_not_friendly_wires(entity, wire_type_name)
+	local entity_force = entity.force
+	local neighbours = entity.neighbours[(wire_type_name or "copper")]
 	local disconnect_neighbour = entity.disconnect_neighbour
 	local friendly_relations = {}
 	for i=1, #neighbours do
 		local neighbour = neighbours[i]
 		local neighbour_force = neighbour.force
-		if force ~= neighbour_force then
+		if entity_force ~= neighbour_force then
 			local is_friendly = friendly_relations[neighbour_force]
 			if is_friendly == false then
 				disconnect_neighbour(neighbour)
 			elseif is_friendly == nil then
-				if force.get_cease_fire(neighbour_force) and
-					neighbour_force.get_cease_fire(force) and
-					force.get_friend(neighbour_force) and
-					neighbour_force.get_friend(force)
+				if entity_force.get_cease_fire(neighbour_force) and
+					neighbour_force.get_cease_fire(entity_force) and
+					entity_force.get_friend(neighbour_force) and
+					neighbour_force.get_friend(entity_force)
 				then
 					friendly_relations[neighbour_force] = true
 				else
