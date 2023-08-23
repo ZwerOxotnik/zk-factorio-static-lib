@@ -1,5 +1,5 @@
 ---@class ZOentity_util
-local entity_util = {build = 8}
+local entity_util = {build = 9}
 
 
 --[[
@@ -20,7 +20,7 @@ local DESTROY_PARAM = {raise_destroy = true}
 local random = math.random
 
 
--- the items must have count
+-- the items must have .count or .amount
 ---@return integer
 function entity_util.transfer_items(source, items, destination)
     local items_amount = items.count or items.amount
@@ -31,8 +31,14 @@ function entity_util.transfer_items(source, items, destination)
         if items.amount then items.amount = count end
     end
     if not destination.can_insert(items) then return 0 end
+
     local inserted_items_count = destination.insert(items)
+	--- It's, probably, right
+	if items.count then items.count = inserted_items_count end
+	if items.amount then items.amount = inserted_items_count end
+
     source.remove_item(items)
+
     return inserted_items_count
 end
 
