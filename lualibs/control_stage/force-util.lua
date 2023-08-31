@@ -1,8 +1,9 @@
 ---@class ZOforce_util
-local force_util = {build = 5}
+local force_util = {build = 6}
 
 
 --[[
+force_util.get_enemy_forces(force)
 force_util.change_techs_safely(force, techs, field_name, value)
 force_util.change_enabled_techs_safely(force, techs, field_name, value)
 force_util.research_techs_safely(force, techs)
@@ -18,6 +19,26 @@ force_util.make_force_neutral(force, other_force)
 force_util.make_force_enemy(force, other_force)
 force_util.make_force_ally(force, other_force)
 ]]
+
+
+---@param target_force LuaForce
+---@return LuaForce[]
+function force_util.get_enemy_forces(target_force)
+	local enemy_forces = {}
+
+	for _, force in pairs(game.forces) do
+		if not (force.valid and target_force ~= force) then
+			goto continue
+		end
+		if target_force.is_enemy(force) then
+			enemy_forces[#enemy_forces+1] = force
+		end
+	    ::continue::
+	end
+
+	return enemy_forces
+end
+
 
 
 ---@param force LuaForce
