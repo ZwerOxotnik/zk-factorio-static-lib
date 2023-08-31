@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 6}
+local force_util = {build = 7}
 
 
 --[[
@@ -189,11 +189,9 @@ function force_util.count_techs(force)
 
 	local technologies = force.technologies
 	for _, tech in pairs(technologies) do
-		if tech.research_unit_count_formula == nil and not tech.upgrade then
-			total_techs = total_techs + 1
-			if tech.researched then
-				researched_techs = researched_techs + 1
-			end
+		total_techs = total_techs + 1
+		if tech.researched then
+			researched_techs = researched_techs + 1
 		end
 	end
 
