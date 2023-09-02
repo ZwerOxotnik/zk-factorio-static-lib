@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 8}
+local force_util = {build = 9}
 
 
 --[[
@@ -25,8 +25,11 @@ force_util.make_force_ally(force, other_force)
 ---@param target_force LuaForce
 ---@return LuaForce[], LuaForce[], LuaForce[] # enemy forces, neutral forces, ally forces
 function force_util.get_forces_by_relations(target_force)
-	local enemy_forces = {}
-	local neutral_forces = {}
+	---@type LuaForce[]
+	local enemy_forces = {nil}
+	---@type LuaForce[]
+	local neutral_forces = {nil}
+	---@type LuaForce[]
 	local ally_forces = {}
 
 	for _, force in pairs(game.forces) do
@@ -35,7 +38,7 @@ function force_util.get_forces_by_relations(target_force)
 		end
 		if target_force.is_enemy(force) then
 			enemy_forces[#enemy_forces+1] = force
-		elseif target_force.is_friend(force) then
+		elseif target_force.get_friend(force) then -- tricky case
 			ally_forces[#ally_forces+1] = force
 		else
 			neutral_forces[#neutral_forces+1] = force
