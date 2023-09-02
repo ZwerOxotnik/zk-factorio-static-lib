@@ -1,8 +1,9 @@
 ---@class ZOforce_util
-local force_util = {build = 7}
+local force_util = {build = 8}
 
 
 --[[
+force_util.get_forces_by_relations(target_force): LuaForce[], LuaForce[], LuaForce[] -- enemy forces, neutral forces, ally forces
 force_util.get_enemy_forces(force)
 force_util.change_techs_safely(force, techs, field_name, value)
 force_util.change_enabled_techs_safely(force, techs, field_name, value)
@@ -22,6 +23,31 @@ force_util.make_force_ally(force, other_force)
 
 
 ---@param target_force LuaForce
+---@return LuaForce[], LuaForce[], LuaForce[] # enemy forces, neutral forces, ally forces
+function force_util.get_forces_by_relations(target_force)
+	local enemy_forces = {}
+	local neutral_forces = {}
+	local ally_forces = {}
+
+	for _, force in pairs(game.forces) do
+		if not (force.valid and target_force ~= force) then
+			goto continue
+		end
+		if target_force.is_enemy(force) then
+			enemy_forces[#enemy_forces+1] = force
+		elseif target_force.is_friend(force) then
+			ally_forces[#ally_forces+1] = force
+		else
+			neutral_forces[#neutral_forces+1] = force
+		end
+	    ::continue::
+	end
+
+	return enemy_forces, neutral_forces, ally_forces
+end
+
+
+---@param target_force LuaForce
 ---@return LuaForce[]
 function force_util.get_enemy_forces(target_force)
 	local enemy_forces = {}
@@ -38,7 +64,6 @@ function force_util.get_enemy_forces(target_force)
 
 	return enemy_forces
 end
-
 
 
 ---@param force LuaForce
