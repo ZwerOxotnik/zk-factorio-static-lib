@@ -1,5 +1,5 @@
 ---@class ZOrcon_util
-local rcon_util = {build = 1}
+local rcon_util = {build = 2}
 
 
 --[[
@@ -17,21 +17,21 @@ function rcon_util.expose_global_data()
 			local parameters = table.pack(...)
 			for _, path in ipairs(parameters) do
 				if type(data) ~= "table" then
-					return
+					return nil
 				end
 				data = data[path]
 				if data == nil then
-					return
+					return nil
 				end
 			end
 			if type(data) == "userdata" then
-				return
+				return nil
 			end
 
 			if type(data) == "table" then
 				rcon.print(game.table_to_json(data))
 			else
-				rcon.print(tostring(data))
+				rcon.print(data)
 			end
 		end,
 	})
