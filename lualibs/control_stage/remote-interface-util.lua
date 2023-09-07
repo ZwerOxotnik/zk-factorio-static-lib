@@ -1,5 +1,5 @@
 ---@class ZOremote_interface_util
-local remote_interface_util = {build = 1}
+local remote_interface_util = {build = 2}
 
 
 --[[
@@ -9,7 +9,11 @@ remote_interface_util.expose_global_data()
 
 function remote_interface_util.expose_global_data()
 	local interface_name =  script.mod_name .. "_ZO_public"
-	remote.remove_interface(interface_name) -- for safety
+	if remote.interfaces[interface_name] then
+		log(string.format("remote.interfaces[\"%s\"] will be recreated", interface_name)) -- TODO: improve
+		remote.remove_interface(interface_name) -- for safety
+	end
+
 	remote.add_interface(interface_name, {
 		---@param ... any
 		---@return any?
@@ -49,6 +53,23 @@ function remote_interface_util.expose_global_data()
 			---@cast _data any
 			prev_data[_data] = data
 			return true
+		end,
+		---@param ... any
+		---@return any?
+		get_from_ENV = function(...)
+			local data = _ENV
+			local parameters = table.pack(...)
+			for _, path in ipairs(parameters) do
+				if type(data) ~= "table" then
+					return nil
+				end
+				data = data[path]
+				if data == nil then
+					return nil
+				end
+			end
+
+			return data
 		end,
 	})
 end
