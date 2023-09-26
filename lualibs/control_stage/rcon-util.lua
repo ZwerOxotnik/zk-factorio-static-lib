@@ -1,5 +1,5 @@
 ---@class ZOrcon_util
-local rcon_util = {build = 2}
+local rcon_util = {build = 3}
 
 
 --[[
@@ -14,7 +14,7 @@ function rcon_util.expose_global_data()
 		---@param ... any
 		print = function(...)
 			local data = global
-			local parameters = table.pack(...)
+			local parameters = {...}
 			for _, path in ipairs(parameters) do
 				if type(data) ~= "table" then
 					return nil

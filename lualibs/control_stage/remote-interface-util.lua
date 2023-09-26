@@ -1,5 +1,5 @@
 ---@class ZOremote_interface_util
-local remote_interface_util = {build = 2}
+local remote_interface_util = {build = 3}
 
 
 --[[
@@ -19,7 +19,7 @@ function remote_interface_util.expose_global_data()
 		---@return any?
 		get = function(...)
 			local data = global
-			local parameters = table.pack(...)
+			local parameters = {...}
 			for _, path in ipairs(parameters) do
 				if type(data) ~= "table" then
 					return nil
@@ -38,7 +38,7 @@ function remote_interface_util.expose_global_data()
 		set = function(data, ...)
 			local prev_data = global --[[@as table]]
 			local _data = prev_data
-			local parameters = table.pack(...)
+			local parameters = {...}
 			for _, path in ipairs(parameters) do
 				if type(_data) ~= "table" then
 					return false
@@ -58,7 +58,7 @@ function remote_interface_util.expose_global_data()
 		---@return any?
 		get_from_ENV = function(...)
 			local data = _ENV
-			local parameters = table.pack(...)
+			local parameters = {...}
 			for _, path in ipairs(parameters) do
 				if type(data) ~= "table" then
 					return nil
