@@ -7,6 +7,7 @@ do
 --#local build = 0
 --#local util_paths = {
 --#	"number-util", "locale", "time-util", "lauxlib", "coordinates-util",
+--# "rich-text-util",
 --#	"control_stage/force-util", "control_stage/entity-util",
 --#	"control_stage/player-util", "control_stage/market-util",
 --#	"control_stage/inventory-util", "control_stage/surface-util",

@@ -6,7 +6,8 @@ do
 	local util
 --#local build = 0
 --#local util_paths = {
---#	"locale", "time-util", "lauxlib", "number-util", "coordinates-util"
+--#	"locale", "time-util", "lauxlib", "number-util", "coordinates-util",
+--# "rich-text-util",
 --#}
 --#for i, path in ipairs(util_paths) do
 --#	write(string.format("	util = require(\"lualibs/%s\")", path))
