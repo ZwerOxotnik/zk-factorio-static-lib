@@ -1,13 +1,29 @@
 --- Quite simple library to handle GUIs in almost data-driven manner. It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local ZOGuiTemplater = {build = 2}
+local ZOGuiTemplater = {build = 3}
 
 ---@type table<uint, fun(event: EventData)>
 ZOGuiTemplater.events = {}
 ---@type table<string, ZOGuiTemplate.event_func>
-ZOGuiTemplater.events_GUIs = {}
+ZOGuiTemplater.events_GUIs = {
+	[script.mod_name .. "_close"] = function(element, player, event)
+		element.parent.parent.destroy()
+	end
+}
 ZOGuiTemplater.raise_error = false
+
+
+ZOGuiTemplater.close_button = {
+	hovered_sprite = "utility/close_black",
+	clicked_sprite = "utility/close_black",
+	sprite = "utility/close_white",
+	style = "frame_action_button",
+	type = "sprite-button",
+	name = script.mod_name .. "_close"
+}
+ZOGuiTemplater.drag_handler  = {type = "empty-widget", name = "drag_handler", style = "draggable_space"}
+ZOGuiTemplater.shallow_frame = {type = "frame", name = "shallow_frame", style = "inside_shallow_frame"}
 
 
 ---@alias ZOGuiTemplate.event_func fun(element: LuaGuiElement, player: LuaPlayer, event: EventData)
@@ -185,6 +201,51 @@ function ZOGuiTemplater.create(init_data)
 	end
 
 	return template
+end
+
+
+---@param player LuaPlayer
+---@param frame_name string
+---@param title string|table?
+---@return LuaGuiElement
+ZOGuiTemplater.create_screen_window = function(player, frame_name, title)
+	local screen = player.gui.screen
+	local prev_location
+	if screen[frame_name] then
+		prev_location = screen[frame_name].location
+		screen[frame_name].destroy()
+	end
+	local main_frame = screen.add{type = "frame", name = frame_name, direction = "vertical"}
+	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work
+	main_frame.style.padding = 4
+
+	local top_flow = main_frame.add{type = "flow"}
+	top_flow.style.horizontal_spacing = 0
+	if title then
+		top_flow.add{
+			type = "label",
+			style = "frame_title",
+			caption = title,
+			ignored_by_interaction = true
+		}
+	end
+	local drag_handler = top_flow.add(ZOGuiTemplater.drag_handler)
+	drag_handler.drag_target = main_frame
+	drag_handler.style.horizontally_stretchable = true
+	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.margin = 0
+	top_flow.add(ZOGuiTemplater.close_button)
+
+	local shallow_frame = main_frame.add(ZOGuiTemplater.shallow_frame)
+	shallow_frame.style.padding = 8
+
+	if prev_location then
+		main_frame.location = prev_location
+	else
+		main_frame.force_auto_center()
+	end
+
+	return shallow_frame
 end
 
 
