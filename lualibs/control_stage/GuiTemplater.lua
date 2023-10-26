@@ -1,7 +1,7 @@
 --- Quite simple library to handle GUIs in almost data-driven manner. It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local ZOGuiTemplater = {build = 1}
+local ZOGuiTemplater = {build = 2}
 
 ---@type table<uint, fun(event: EventData)>
 ZOGuiTemplater.events = {}
