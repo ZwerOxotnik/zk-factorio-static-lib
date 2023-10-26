@@ -7,6 +7,7 @@ local ZOGuiTemplater = {build = 1}
 ZOGuiTemplater.events = {}
 ---@type table<string, ZOGuiTemplate.event_func>
 ZOGuiTemplater.events_GUIs = {}
+ZOGuiTemplater.raise_error = false
 
 
 ---@alias ZOGuiTemplate.event_func fun(element: LuaGuiElement, player: LuaPlayer, event: EventData)
@@ -27,7 +28,7 @@ ZOGuiTemplater.events_GUIs = {}
 ---@field events? ZOGuiTemplater.event[]
 ---@field children? ZOGuiTemplater.data[]
 ---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
----@field raise_error? boolean # Doesn't raise errors by default, WARNING: works only for top element
+---@field raise_error? boolean
 --TODO: create_for_new_players, create_for_joined_players, destroy_for_left_players
 
 
@@ -87,7 +88,7 @@ function ZOGuiTemplater.create(init_data)
 
 		local is_ok, newGui, result
 		local element = template_data.element
-		if init_data.raise_error then
+		if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
 			newGui = gui.add(element)
 		else
 			is_ok, newGui = pcall(gui.add, element)
@@ -105,7 +106,7 @@ function ZOGuiTemplater.create(init_data)
 		end
 
 		if template_data.on_create then
-			if init_data.raise_error then
+			if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
 				template_data.on_create(newGui)
 			else
 				is_ok, result = pcall(template_data.on_create, newGui)
@@ -130,7 +131,7 @@ function ZOGuiTemplater.create(init_data)
 		end
 
 		if template_data.on_finish then
-			if init_data.raise_error then
+			if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
 				template_data.on_finish(newGui)
 			else
 				is_ok = pcall(template_data.on_finish, newGui)
@@ -148,7 +149,7 @@ function ZOGuiTemplater.create(init_data)
 		if targetGui and targetGui.valid then
 			local is_ok = true
 			if init_data.on_pre_destroy then
-				if init_data.raise_error then
+				if init_data.raise_error or (ZOGuiTemplater.raise_error and init_data.raise_error ~= false) then
 					init_data.on_pre_destroy(targetGui)
 				else
 					is_ok = pcall(init_data.on_pre_destroy, targetGui)
@@ -170,7 +171,7 @@ function ZOGuiTemplater.create(init_data)
 		if targetGui and targetGui.valid then
 			local is_ok = true
 			if init_data.on_pre_clear then
-				if init_data.raise_error then
+				if init_data.raise_error or (ZOGuiTemplater.raise_error and init_data.raise_error ~= false) then
 					init_data.on_pre_clear(targetGui)
 				else
 					is_ok = pcall(init_data.on_pre_clear, targetGui)
