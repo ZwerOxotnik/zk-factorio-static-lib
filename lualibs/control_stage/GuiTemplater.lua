@@ -3,7 +3,7 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 8}
+local GuiTemplater = {build = 9}
 
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {}
@@ -619,27 +619,24 @@ function GuiTemplater.create(init_data)
 		else
 			is_ok, newGui = pcall(gui.add, element)
 			if not is_ok then
-				GuiTemplater._log(newGui, player)
 				-- Try to fix buttons, styles
 				local function fix()
+					GuiTemplater._log(newGui, player)
 					if element.type == "sprite-button" and newGui:find("Unknown sprite") then
 						element.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
 						element.hovered_sprite = nil
 						element.clicked_sprite = nil
 						is_ok, newGui = pcall(gui.add, element)
 						if not is_ok then
-							GuiTemplater._log(newGui, player)
 							fix()
 						end
 					elseif newGui:find("Unknown style") then
 						element.style = nil
 						is_ok, newGui = pcall(gui.add, element)
 						if not is_ok then
-							GuiTemplater._log(newGui, player)
 							fix()
 						end
 					end
-					return is_ok
 				end
 				fix()
 
