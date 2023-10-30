@@ -17,6 +17,20 @@ GuiTemplater.raise_error = false
 GuiTemplater.print_errors_to_admins = true
 
 
+--[[
+GuiTemplater.create(init_data: ZOGuiTemplater.data): ZOGuiTemplate
+GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string, title: string|table?): LuaGuiElement
+GuiTemplater.make_table_as_list(tableGUI: LuaGuiElement, minimal_column_width: integer?): LuaGuiElement
+GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
+
+--Requires zk-lib!
+GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+]]
+
 
 ---@alias ZOGuiTemplate.event_func fun(element: LuaGuiElement, player: LuaPlayer, event: EventData)
 
@@ -782,9 +796,9 @@ end
 
 
 ---@param tableGUI LuaGuiElement
----@param minimal_width integer?
+---@param minimal_column_width integer?
 ---@return LuaGuiElement
-function GuiTemplater.make_table_as_list(tableGUI, minimal_width)
+function GuiTemplater.make_table_as_list(tableGUI, minimal_column_width)
 	local style = tableGUI.style
 	style.horizontal_spacing = 16
 	style.vertical_spacing = 8
@@ -794,11 +808,11 @@ function GuiTemplater.make_table_as_list(tableGUI, minimal_width)
 	local EMPTY_WIDGET = GuiTemplater.empty_widget
 	for i = 1, tableGUI.column_count do
 		column_alignments[i] = "center"
-		if minimal_width then
+		if minimal_column_width then
 			local dummy = tableGUI.add(EMPTY_WIDGET)
 			local _style = dummy.style
 			_style.horizontally_stretchable = true
-			_style.minimal_width = minimal_width
+			_style.minimal_width = minimal_column_width
 		end
 	end
 	tableGUI.draw_horizontal_lines = true
