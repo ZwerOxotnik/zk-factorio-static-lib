@@ -3,7 +3,7 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local ZOGuiTemplater = {build = 5}
+local ZOGuiTemplater = {build = 6}
 
 ---@type table<uint, fun(event: EventData)>
 ZOGuiTemplater.events = {}
@@ -771,6 +771,33 @@ ZOGuiTemplater.create_screen_window = function(player, frame_name, title)
 	end
 
 	return shallow_frame
+end
+
+
+---@param tableGUI LuaGuiElement
+---@param minimal_width integer?
+---@return LuaGuiElement
+function ZOGuiTemplater.make_table_as_list(tableGUI, minimal_width)
+	local style = tableGUI.style
+	style.horizontal_spacing = 16
+	style.vertical_spacing = 8
+	style.top_margin = -16 -- perhaps wrong without minimal_width
+	local column_alignments = style.column_alignments
+
+	local EMPTY_WIDGET = ZOGuiTemplater.empty_widget
+	for i = 1, tableGUI.column_count do
+		column_alignments[i] = "center"
+		if minimal_width then
+			local dummy = tableGUI.add(EMPTY_WIDGET)
+			local _style = dummy.style
+			_style.horizontally_stretchable = true
+			_style.minimal_width = minimal_width
+		end
+	end
+	tableGUI.draw_horizontal_lines = true
+	tableGUI.draw_vertical_lines = true
+
+	return tableGUI
 end
 
 
