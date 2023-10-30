@@ -3,7 +3,7 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 9}
+local GuiTemplater = {build = 10}
 
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {}
@@ -832,6 +832,19 @@ end
 function GuiTemplater.create_left_relative_frame(gui, name, anchor)
 	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
 	main_frame.style.right_margin = -14
+	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
+
+	return frame
+end
+
+
+---@param gui LuaGuiElement
+---@param name string?
+---@param anchor GuiAnchor
+---@return LuaGuiElement
+function GuiTemplater.create_right_relative_frame(gui, name, anchor)
+	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
+	main_frame.style.left_margin = -14
 	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 
 	return frame
