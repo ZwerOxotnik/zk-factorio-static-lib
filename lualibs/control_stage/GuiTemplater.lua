@@ -1,9 +1,9 @@
---- Quite simple semi-agnostic library to handle GUIs in almost data-driven manner, fixing missing sprites.
+--- Quite simple semi-agnostic library to handle GUIs in almost data-driven manner, fixing missing sprites, styles.
 --- Turn zk-lib on to get better icons, functions, styles.
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local ZOGuiTemplater = {build = 4}
+local ZOGuiTemplater = {build = 5}
 
 ---@type table<uint, fun(event: EventData)>
 ZOGuiTemplater.events = {}
@@ -67,8 +67,16 @@ ZOGuiTemplater.empty_widget = {type = "empty-widget"}
 
 
 ZOGuiTemplater.buttons = {
-	confirm_button = {type = "button", caption = {"gui.confirm"}},
+	confirm_button = {type = "button", style = "confirm_button", caption = {"gui.confirm"}},
+	new_game_header_list_box_item = {type = "button", style = "new_game_header_list_box_item"},
+	menu_button_continue = {type = "button", style = "menu_button_continue"},
 	cancel_button  = {type = "button", caption = {"gui-mod-settings.cancel"}},
+	rounded_button = {type = "button", style = "rounded_button"},
+	mini_tool_button_red = {type = "button", style = "mini_tool_button_red"},
+	red_back_button = {type = "button", style = "red_back_button"},
+	red_button = {type = "button", style = "red_button"},
+	tool_button = {type = "button", style = "tool_button"},
+	back_button = {type = "button", style = "back_button"},
 	plus = {style = "frame_action_button"}, -- from zk-lib
 	missing_icon = {sprite = "utility/missing_icon"},
 	cross_select = {sprite = "utility/cross_select"},
@@ -491,7 +499,9 @@ end
 
 ZOGuiTemplater.frames = {
 	borderless_frame     = {style = "borderless_frame"},
-	inside_shallow_frame = {name = "shallow_frame", style = "inside_shallow_frame"},
+	inside_shallow_frame = {style = "inside_shallow_frame"},
+	subheader_frame      = {style = "subheader_frame"},
+	subpanel_frame       = {style = "subpanel_frame"},
 }
 if script.active_mods["zk-lib"] then
 	ZOGuiTemplater.frames.zk_transparent_frame      = {style = "zk_transparent_frame"}
@@ -499,6 +509,22 @@ if script.active_mods["zk-lib"] then
 end
 for _, data in pairs(ZOGuiTemplater.frames) do
 	data.type = "frame"
+end
+
+
+ZOGuiTemplater.tables = {
+	graphics_settings_table = {style = "graphics_settings_table"},
+}
+for _, data in pairs(ZOGuiTemplater.tables) do
+	data.type = "table"
+end
+
+
+ZOGuiTemplater.labels = {
+	graphics_settings_table = {style = "caption_label"},
+}
+for _, data in pairs(ZOGuiTemplater.labels) do
+	data.type = "label"
 end
 
 
@@ -584,21 +610,29 @@ function ZOGuiTemplater.create(init_data)
 			is_ok, newGui = pcall(gui.add, element)
 			if not is_ok then
 				ZOGuiTemplater._log(newGui, player)
-				-- Try to fix buttons
-				if element.type == "sprite-button" and newGui:find("Unknown sprite") then
-					local prev_sprite = element.sprite
-					local prev_hovered_sprite = element.hovered_sprite
-					local prev_clicked_sprite = element.clicked_sprite
-					element.sprite = "utility/missing_icon" -- utility/missing_mod_icon
-					element.hovered_sprite = nil
-					element.clicked_sprite = nil
-					is_ok, newGui = pcall(gui.add, element)
-					if not is_ok then
-						element.sprite = prev_sprite
-						element.hovered_sprite = prev_hovered_sprite
-						element.clicked_sprite = prev_clicked_sprite
+				-- Try to fix buttons, styles
+				local function fix()
+					if element.type == "sprite-button" and newGui:find("Unknown sprite") then
+						element.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
+						element.hovered_sprite = nil
+						element.clicked_sprite = nil
+						is_ok, newGui = pcall(gui.add, element)
+						if not is_ok then
+							ZOGuiTemplater._log(newGui, player)
+							fix()
+						end
+					elseif newGui:find("Unknown style") then
+						element.style = nil
+						is_ok, newGui = pcall(gui.add, element)
+						if not is_ok then
+							ZOGuiTemplater._log(newGui, player)
+							fix()
+						end
 					end
+					return is_ok
 				end
+				fix()
+
 				if not is_ok then
 					return false
 				end
