@@ -3,18 +3,18 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local ZOGuiTemplater = {build = 6}
+local GuiTemplater = {build = 7}
 
 ---@type table<uint, fun(event: EventData)>
-ZOGuiTemplater.events = {}
+GuiTemplater.events = {}
 ---@type table<string, ZOGuiTemplate.event_func>
-ZOGuiTemplater.events_GUIs = {
+GuiTemplater.events_GUIs = {
 	[script.mod_name .. "_close"] = function(element, player, event)
 		element.parent.parent.destroy()
 	end
 }
-ZOGuiTemplater.raise_error = false
-ZOGuiTemplater.print_errors_to_admins = true
+GuiTemplater.raise_error = false
+GuiTemplater.print_errors_to_admins = true
 
 
 
@@ -61,12 +61,13 @@ ZOGuiTemplater.print_errors_to_admins = true
 ---@field clear       fun(gui: LuaGuiElement?): boolean
 
 
-ZOGuiTemplater.drag_handler = {type = "empty-widget", name = "drag_handler", style = "draggable_space"}
-ZOGuiTemplater.flow = {type = "flow"}
-ZOGuiTemplater.empty_widget = {type = "empty-widget"}
+GuiTemplater.drag_handler  = {type = "empty-widget", name = "drag_handler", style = "draggable_space"}
+GuiTemplater.empty_widget  = {type = "empty-widget"}
+GuiTemplater.flow          = {type = "flow", direction = "horizontal"}
+GuiTemplater.vertical_flow = {type = "flow", direction = "vertical"}
 
 
-ZOGuiTemplater.buttons = {
+GuiTemplater.buttons = {
 	confirm_button = {type = "button", style = "confirm_button", caption = {"gui.confirm"}},
 	new_game_header_list_box_item = {type = "button", style = "new_game_header_list_box_item"},
 	menu_button_continue = {type = "button", style = "menu_button_continue"},
@@ -107,6 +108,7 @@ ZOGuiTemplater.buttons = {
 	equipment_grid   = {sprite = "utility/equipment_grid"},
 	not_available    = {sprite = "utility/not_available"},
 	restart_required = {sprite = "restart_required"},
+	slot_button  = {sprite = "utility/slot_button"},
 	player       = {sprite = "utility/player_force_icon"},
 	too_far      = {sprite = "utility/too_far"},
 	danger_icon  = {sprite = "utility/danger_icon"},
@@ -182,6 +184,12 @@ ZOGuiTemplater.buttons = {
 	confirm = { -- TODO: improve style
 		style = "frame_action_button",
 		sprite = "utility/confirm_slot",
+	},
+	side_menu_menu = {
+		sprite = "utility/side_menu_menu_icon",
+		hovered_sprite = "utility/side_menu_menu_hover_icon",
+		clicked_sprite = "utility/side_menu_menu_hover_icon",
+		style = "slot_button"
 	},
 	hand = {
 		style = "slot_button",
@@ -350,180 +358,182 @@ ZOGuiTemplater.buttons = {
 	},
 }
 if script.active_mods["zk-lib"] then
-	ZOGuiTemplater.buttons.map_exchange_string.sprite = "map_exchange_string_white"
-	ZOGuiTemplater.buttons.plus.sprite = "plus_white"
-	ZOGuiTemplater.buttons.plus.hovered_sprite = "plus"
-	ZOGuiTemplater.buttons.plus.clicked_sprite = "plus"
-	ZOGuiTemplater.buttons.confirm.sprite = "confirm_white"
-	ZOGuiTemplater.buttons.confirm.hovered_sprite = "utility/confirm_slot"
-	ZOGuiTemplater.buttons.confirm.clicked_sprite = "utility/confirm_slot"
-	ZOGuiTemplater.buttons.bookmark.sprite = "bookmark_white"
-	ZOGuiTemplater.buttons.bookmark.hovered_sprite = "utility/bookmark"
-	ZOGuiTemplater.buttons.bookmark.clicked_sprite = "utility/bookmark"
-	ZOGuiTemplater.buttons.brush.sprite = "brush_icon_white"
-	ZOGuiTemplater.buttons.brush.hovered_sprite = "utility/brush_icon"
-	ZOGuiTemplater.buttons.brush.clicked_sprite = "utility/brush_icon"
-	ZOGuiTemplater.buttons.center.sprite = "center_white"
-	ZOGuiTemplater.buttons.center.hovered_sprite = "utility/center"
-	ZOGuiTemplater.buttons.center.clicked_sprite = "utility/center"
-	ZOGuiTemplater.buttons.change_recipe.sprite = "change_recipe_white"
-	ZOGuiTemplater.buttons.change_recipe.hovered_sprite = "utility/change_recipe"
-	ZOGuiTemplater.buttons.change_recipe.clicked_sprite = "utility/change_recipe"
-	ZOGuiTemplater.buttons.gears.sprite = "change_recipe_white"
-	ZOGuiTemplater.buttons.gears.hovered_sprite = "utility/change_recipe"
-	ZOGuiTemplater.buttons.gears.clicked_sprite = "utility/change_recipe"
-	ZOGuiTemplater.buttons.clone.sprite = "clone_white"
-	ZOGuiTemplater.buttons.clone.hovered_sprite = "utility/clone"
-	ZOGuiTemplater.buttons.clone.clicked_sprite = "utility/clone"
-	ZOGuiTemplater.buttons.add.sprite = "add_white"
-	ZOGuiTemplater.buttons.add.hovered_sprite = "utility/add"
-	ZOGuiTemplater.buttons.add.clicked_sprite = "utility/add"
-	ZOGuiTemplater.buttons.close_fat.sprite = "close_fat_white"
-	ZOGuiTemplater.buttons.close_fat.hovered_sprite = "utility/close_fat"
-	ZOGuiTemplater.buttons.close_fat.clicked_sprite = "utility/close_fat"
-	ZOGuiTemplater.buttons.close_map_preview.sprite = "close_map_preview_white"
-	ZOGuiTemplater.buttons.close_map_preview.hovered_sprite = "utility/close_map_preview"
-	ZOGuiTemplater.buttons.close_map_preview.clicked_sprite = "utility/close_map_preview"
-	ZOGuiTemplater.buttons.color_picker.sprite = "color_picker_white"
-	ZOGuiTemplater.buttons.color_picker.hovered_sprite = "utility/color_picker"
-	ZOGuiTemplater.buttons.color_picker.clicked_sprite = "utility/color_picker"
-	ZOGuiTemplater.buttons.confirm.sprite = "confirm_slot_white"
-	ZOGuiTemplater.buttons.confirm.hovered_sprite = "utility/confirm_slot"
-	ZOGuiTemplater.buttons.confirm.clicked_sprite = "utility/confirm_slot"
-	ZOGuiTemplater.buttons.dropdown.sprite = "dropdown_white"
-	ZOGuiTemplater.buttons.dropdown.hovered_sprite = "utility/dropdown"
-	ZOGuiTemplater.buttons.dropdown.clicked_sprite = "utility/dropdown"
-	ZOGuiTemplater.buttons.tick_custom.sprite = "tick_custom_white"
-	ZOGuiTemplater.buttons.tick_custom.hovered_sprite = "utility/tick_custom"
-	ZOGuiTemplater.buttons.tick_custom.clicked_sprite = "utility/tick_custom"
-	ZOGuiTemplater.buttons.tick_once.sprite = "tick_once_white"
-	ZOGuiTemplater.buttons.tick_once.hovered_sprite = "utility/tick_once"
-	ZOGuiTemplater.buttons.tick_once.clicked_sprite = "utility/tick_once"
-	ZOGuiTemplater.buttons.tick_sixty.sprite = "tick_sixty_white"
-	ZOGuiTemplater.buttons.tick_sixty.hovered_sprite = "utility/tick_sixty"
-	ZOGuiTemplater.buttons.tick_sixty.clicked_sprite = "utility/tick_sixty"
-	ZOGuiTemplater.buttons.enter.sprite = "enter_white"
-	ZOGuiTemplater.buttons.enter.hovered_sprite = "utility/enter"
-	ZOGuiTemplater.buttons.enter.clicked_sprite = "utility/enter"
-	ZOGuiTemplater.buttons.export.sprite = "export_white"
-	ZOGuiTemplater.buttons.export.hovered_sprite = "utility/export"
-	ZOGuiTemplater.buttons.export.clicked_sprite = "utility/export"
-	ZOGuiTemplater.buttons.go_to_arrow.sprite = "go_to_arrow_white"
-	ZOGuiTemplater.buttons.go_to_arrow.hovered_sprite = "utility/go_to_arrow"
-	ZOGuiTemplater.buttons.go_to_arrow.clicked_sprite = "utility/go_to_arrow"
-	ZOGuiTemplater.buttons.mod_dependency_arrow.sprite = "mod_dependency_arrow_white"
-	ZOGuiTemplater.buttons.mod_dependency_arrow.hovered_sprite = "utility/mod_dependency_arrow"
-	ZOGuiTemplater.buttons.mod_dependency_arrow.clicked_sprite = "utility/mod_dependency_arrow"
-	ZOGuiTemplater.buttons.grid_view.sprite = "grid_view_white"
-	ZOGuiTemplater.buttons.grid_view.hovered_sprite = "utility/grid_view"
-	ZOGuiTemplater.buttons.grid_view.clicked_sprite = "utility/grid_view"
-	ZOGuiTemplater.buttons.import.sprite = "import_white"
-	ZOGuiTemplater.buttons.import.hovered_sprite = "utility/import"
-	ZOGuiTemplater.buttons.import.clicked_sprite = "utility/import"
-	ZOGuiTemplater.buttons.import_slot.sprite = "import_slot_white"
-	ZOGuiTemplater.buttons.import_slot.hovered_sprite = "utility/import_slot"
-	ZOGuiTemplater.buttons.import_slot.clicked_sprite = "utility/import_slot"
-	ZOGuiTemplater.buttons.thin_left_arrow.sprite = "left_arrow_white"
-	ZOGuiTemplater.buttons.thin_left_arrow.hovered_sprite = "utility/left_arrow"
-	ZOGuiTemplater.buttons.thin_left_arrow.clicked_sprite = "utility/left_arrow"
-	ZOGuiTemplater.buttons.list_view.sprite = "list_view_white"
-	ZOGuiTemplater.buttons.list_view.hovered_sprite = "utility/list_view"
-	ZOGuiTemplater.buttons.list_view.clicked_sprite = "utility/list_view"
-	ZOGuiTemplater.buttons.map.sprite = "map_white"
-	ZOGuiTemplater.buttons.map.hovered_sprite = "utility/map"
-	ZOGuiTemplater.buttons.map.clicked_sprite = "utility/map"
-	ZOGuiTemplater.buttons.paint_bucket.sprite = "paint_bucket_icon_white"
-	ZOGuiTemplater.buttons.paint_bucket.hovered_sprite = "utility/paint_bucket_icon"
-	ZOGuiTemplater.buttons.paint_bucket.clicked_sprite = "utility/paint_bucket_icon"
-	ZOGuiTemplater.buttons.pause.sprite = "pause_white"
-	ZOGuiTemplater.buttons.pause.hovered_sprite = "utility/pause"
-	ZOGuiTemplater.buttons.pause.clicked_sprite = "utility/pause"
-	ZOGuiTemplater.buttons.play.sprite = "play_white"
-	ZOGuiTemplater.buttons.play.hovered_sprite = "utility/play"
-	ZOGuiTemplater.buttons.play.clicked_sprite = "utility/play"
-	ZOGuiTemplater.buttons.preset.sprite = "preset_white"
-	ZOGuiTemplater.buttons.preset.hovered_sprite = "utility/preset"
-	ZOGuiTemplater.buttons.preset.clicked_sprite = "utility/preset"
-	ZOGuiTemplater.buttons.refresh.sprite = "refresh_white"
-	ZOGuiTemplater.buttons.refresh.hovered_sprite = "utility/refresh"
-	ZOGuiTemplater.buttons.refresh.clicked_sprite = "utility/refresh"
-	ZOGuiTemplater.buttons.rename.sprite = "rename_icon_normal_white"
-	ZOGuiTemplater.buttons.rename.hovered_sprite = "utility/rename_icon_normal"
-	ZOGuiTemplater.buttons.rename.clicked_sprite = "utility/rename_icon_normal"
-	ZOGuiTemplater.buttons.thin_right_arrow.sprite = "right_arrow_white"
-	ZOGuiTemplater.buttons.thin_right_arrow.hovered_sprite = "utility/right_arrow"
-	ZOGuiTemplater.buttons.thin_right_arrow.clicked_sprite = "utility/right_arrow"
-	ZOGuiTemplater.buttons.area.sprite = "area_icon_white"
-	ZOGuiTemplater.buttons.area.hovered_sprite = "utility/area_icon"
-	ZOGuiTemplater.buttons.area.clicked_sprite = "utility/area_icon"
-	ZOGuiTemplater.buttons.shuffle.sprite = "shuffle_white"
-	ZOGuiTemplater.buttons.shuffle.hovered_sprite = "utility/shuffle"
-	ZOGuiTemplater.buttons.shuffle.clicked_sprite = "utility/shuffle"
-	ZOGuiTemplater.buttons.speed_down.sprite = "speed_down_white"
-	ZOGuiTemplater.buttons.speed_down.hovered_sprite = "utility/speed_down"
-	ZOGuiTemplater.buttons.speed_down.clicked_sprite = "utility/speed_down"
-	ZOGuiTemplater.buttons.speed_up.sprite = "speed_up_white"
-	ZOGuiTemplater.buttons.speed_up.hovered_sprite = "utility/speed_up"
-	ZOGuiTemplater.buttons.speed_up.clicked_sprite = "utility/speed_up"
-	ZOGuiTemplater.buttons.spray.sprite = "spray_icon_white"
-	ZOGuiTemplater.buttons.spray.hovered_sprite = "utility/spray_icon"
-	ZOGuiTemplater.buttons.spray.clicked_sprite = "utility/spray_icon"
-	ZOGuiTemplater.buttons.stop.sprite = "stop_white"
-	ZOGuiTemplater.buttons.stop.hovered_sprite = "utility/stop"
-	ZOGuiTemplater.buttons.stop.clicked_sprite = "utility/stop"
-	ZOGuiTemplater.buttons.sync_mods.sprite = "sync_mods_white"
-	ZOGuiTemplater.buttons.sync_mods.hovered_sprite = "utility/sync_mods"
-	ZOGuiTemplater.buttons.sync_mods.clicked_sprite = "utility/sync_mods"
-	ZOGuiTemplater.buttons.questionmark.sprite = "questionmark_white"
-	ZOGuiTemplater.buttons.questionmark.hovered_sprite = "utility/questionmark"
-	ZOGuiTemplater.buttons.questionmark.clicked_sprite = "utility/questionmark"
-	ZOGuiTemplater.buttons.missing_icon.sprite = "questionmark_white"
-	ZOGuiTemplater.buttons.missing_icon.hovered_sprite = "utility/questionmark"
-	ZOGuiTemplater.buttons.missing_icon.clicked_sprite = "utility/questionmark"
-	ZOGuiTemplater.buttons.variations_tool.sprite = "variations_tool_icon_white"
-	ZOGuiTemplater.buttons.variations_tool.hovered_sprite = "utility/variations_tool_icon"
-	ZOGuiTemplater.buttons.variations_tool.clicked_sprite = "utility/variations_tool_icon"
-	ZOGuiTemplater.buttons.copy.sprite = "copy_white"
-	ZOGuiTemplater.buttons.copy.hovered_sprite = "utility/copy"
-	ZOGuiTemplater.buttons.copy.clicked_sprite = "utility/copy"
-	ZOGuiTemplater.buttons.export_slot.sprite = "export_slot_white"
-	ZOGuiTemplater.buttons.export_slot.hovered_sprite = "utility/export_slot"
-	ZOGuiTemplater.buttons.export_slot.clicked_sprite = "utility/export_slot"
+	GuiTemplater.buttons.map_exchange_string.sprite = "map_exchange_string_white"
+	GuiTemplater.buttons.plus.sprite = "plus_white"
+	GuiTemplater.buttons.plus.hovered_sprite = "plus"
+	GuiTemplater.buttons.plus.clicked_sprite = "plus"
+	GuiTemplater.buttons.confirm.sprite = "confirm_white"
+	GuiTemplater.buttons.confirm.hovered_sprite = "utility/confirm_slot"
+	GuiTemplater.buttons.confirm.clicked_sprite = "utility/confirm_slot"
+	GuiTemplater.buttons.bookmark.sprite = "bookmark_white"
+	GuiTemplater.buttons.bookmark.hovered_sprite = "utility/bookmark"
+	GuiTemplater.buttons.bookmark.clicked_sprite = "utility/bookmark"
+	GuiTemplater.buttons.brush.sprite = "brush_icon_white"
+	GuiTemplater.buttons.brush.hovered_sprite = "utility/brush_icon"
+	GuiTemplater.buttons.brush.clicked_sprite = "utility/brush_icon"
+	GuiTemplater.buttons.center.sprite = "center_white"
+	GuiTemplater.buttons.center.hovered_sprite = "utility/center"
+	GuiTemplater.buttons.center.clicked_sprite = "utility/center"
+	GuiTemplater.buttons.change_recipe.sprite = "change_recipe_white"
+	GuiTemplater.buttons.change_recipe.hovered_sprite = "utility/change_recipe"
+	GuiTemplater.buttons.change_recipe.clicked_sprite = "utility/change_recipe"
+	GuiTemplater.buttons.gears.sprite = "change_recipe_white"
+	GuiTemplater.buttons.gears.hovered_sprite = "utility/change_recipe"
+	GuiTemplater.buttons.gears.clicked_sprite = "utility/change_recipe"
+	GuiTemplater.buttons.clone.sprite = "clone_white"
+	GuiTemplater.buttons.clone.hovered_sprite = "utility/clone"
+	GuiTemplater.buttons.clone.clicked_sprite = "utility/clone"
+	GuiTemplater.buttons.add.sprite = "add_white"
+	GuiTemplater.buttons.add.hovered_sprite = "utility/add"
+	GuiTemplater.buttons.add.clicked_sprite = "utility/add"
+	GuiTemplater.buttons.close_fat.sprite = "close_fat_white"
+	GuiTemplater.buttons.close_fat.hovered_sprite = "utility/close_fat"
+	GuiTemplater.buttons.close_fat.clicked_sprite = "utility/close_fat"
+	GuiTemplater.buttons.close_map_preview.sprite = "close_map_preview_white"
+	GuiTemplater.buttons.close_map_preview.hovered_sprite = "utility/close_map_preview"
+	GuiTemplater.buttons.close_map_preview.clicked_sprite = "utility/close_map_preview"
+	GuiTemplater.buttons.color_picker.sprite = "color_picker_white"
+	GuiTemplater.buttons.color_picker.hovered_sprite = "utility/color_picker"
+	GuiTemplater.buttons.color_picker.clicked_sprite = "utility/color_picker"
+	GuiTemplater.buttons.confirm.sprite = "confirm_slot_white"
+	GuiTemplater.buttons.confirm.hovered_sprite = "utility/confirm_slot"
+	GuiTemplater.buttons.confirm.clicked_sprite = "utility/confirm_slot"
+	GuiTemplater.buttons.dropdown.sprite = "dropdown_white"
+	GuiTemplater.buttons.dropdown.hovered_sprite = "utility/dropdown"
+	GuiTemplater.buttons.dropdown.clicked_sprite = "utility/dropdown"
+	GuiTemplater.buttons.tick_custom.sprite = "tick_custom_white"
+	GuiTemplater.buttons.tick_custom.hovered_sprite = "utility/tick_custom"
+	GuiTemplater.buttons.tick_custom.clicked_sprite = "utility/tick_custom"
+	GuiTemplater.buttons.tick_once.sprite = "tick_once_white"
+	GuiTemplater.buttons.tick_once.hovered_sprite = "utility/tick_once"
+	GuiTemplater.buttons.tick_once.clicked_sprite = "utility/tick_once"
+	GuiTemplater.buttons.tick_sixty.sprite = "tick_sixty_white"
+	GuiTemplater.buttons.tick_sixty.hovered_sprite = "utility/tick_sixty"
+	GuiTemplater.buttons.tick_sixty.clicked_sprite = "utility/tick_sixty"
+	GuiTemplater.buttons.enter.sprite = "enter_white"
+	GuiTemplater.buttons.enter.hovered_sprite = "utility/enter"
+	GuiTemplater.buttons.enter.clicked_sprite = "utility/enter"
+	GuiTemplater.buttons.export.sprite = "export_white"
+	GuiTemplater.buttons.export.hovered_sprite = "utility/export"
+	GuiTemplater.buttons.export.clicked_sprite = "utility/export"
+	GuiTemplater.buttons.go_to_arrow.sprite = "go_to_arrow_white"
+	GuiTemplater.buttons.go_to_arrow.hovered_sprite = "utility/go_to_arrow"
+	GuiTemplater.buttons.go_to_arrow.clicked_sprite = "utility/go_to_arrow"
+	GuiTemplater.buttons.mod_dependency_arrow.sprite = "mod_dependency_arrow_white"
+	GuiTemplater.buttons.mod_dependency_arrow.hovered_sprite = "utility/mod_dependency_arrow"
+	GuiTemplater.buttons.mod_dependency_arrow.clicked_sprite = "utility/mod_dependency_arrow"
+	GuiTemplater.buttons.grid_view.sprite = "grid_view_white"
+	GuiTemplater.buttons.grid_view.hovered_sprite = "utility/grid_view"
+	GuiTemplater.buttons.grid_view.clicked_sprite = "utility/grid_view"
+	GuiTemplater.buttons.import.sprite = "import_white"
+	GuiTemplater.buttons.import.hovered_sprite = "utility/import"
+	GuiTemplater.buttons.import.clicked_sprite = "utility/import"
+	GuiTemplater.buttons.import_slot.sprite = "import_slot_white"
+	GuiTemplater.buttons.import_slot.hovered_sprite = "utility/import_slot"
+	GuiTemplater.buttons.import_slot.clicked_sprite = "utility/import_slot"
+	GuiTemplater.buttons.thin_left_arrow.sprite = "left_arrow_white"
+	GuiTemplater.buttons.thin_left_arrow.hovered_sprite = "utility/left_arrow"
+	GuiTemplater.buttons.thin_left_arrow.clicked_sprite = "utility/left_arrow"
+	GuiTemplater.buttons.list_view.sprite = "list_view_white"
+	GuiTemplater.buttons.list_view.hovered_sprite = "utility/list_view"
+	GuiTemplater.buttons.list_view.clicked_sprite = "utility/list_view"
+	GuiTemplater.buttons.map.sprite = "map_white"
+	GuiTemplater.buttons.map.hovered_sprite = "utility/map"
+	GuiTemplater.buttons.map.clicked_sprite = "utility/map"
+	GuiTemplater.buttons.paint_bucket.sprite = "paint_bucket_icon_white"
+	GuiTemplater.buttons.paint_bucket.hovered_sprite = "utility/paint_bucket_icon"
+	GuiTemplater.buttons.paint_bucket.clicked_sprite = "utility/paint_bucket_icon"
+	GuiTemplater.buttons.pause.sprite = "pause_white"
+	GuiTemplater.buttons.pause.hovered_sprite = "utility/pause"
+	GuiTemplater.buttons.pause.clicked_sprite = "utility/pause"
+	GuiTemplater.buttons.play.sprite = "play_white"
+	GuiTemplater.buttons.play.hovered_sprite = "utility/play"
+	GuiTemplater.buttons.play.clicked_sprite = "utility/play"
+	GuiTemplater.buttons.preset.sprite = "preset_white"
+	GuiTemplater.buttons.preset.hovered_sprite = "utility/preset"
+	GuiTemplater.buttons.preset.clicked_sprite = "utility/preset"
+	GuiTemplater.buttons.refresh.sprite = "refresh_white"
+	GuiTemplater.buttons.refresh.hovered_sprite = "utility/refresh"
+	GuiTemplater.buttons.refresh.clicked_sprite = "utility/refresh"
+	GuiTemplater.buttons.rename.sprite = "rename_icon_normal_white"
+	GuiTemplater.buttons.rename.hovered_sprite = "utility/rename_icon_normal"
+	GuiTemplater.buttons.rename.clicked_sprite = "utility/rename_icon_normal"
+	GuiTemplater.buttons.thin_right_arrow.sprite = "right_arrow_white"
+	GuiTemplater.buttons.thin_right_arrow.hovered_sprite = "utility/right_arrow"
+	GuiTemplater.buttons.thin_right_arrow.clicked_sprite = "utility/right_arrow"
+	GuiTemplater.buttons.area.sprite = "area_icon_white"
+	GuiTemplater.buttons.area.hovered_sprite = "utility/area_icon"
+	GuiTemplater.buttons.area.clicked_sprite = "utility/area_icon"
+	GuiTemplater.buttons.shuffle.sprite = "shuffle_white"
+	GuiTemplater.buttons.shuffle.hovered_sprite = "utility/shuffle"
+	GuiTemplater.buttons.shuffle.clicked_sprite = "utility/shuffle"
+	GuiTemplater.buttons.speed_down.sprite = "speed_down_white"
+	GuiTemplater.buttons.speed_down.hovered_sprite = "utility/speed_down"
+	GuiTemplater.buttons.speed_down.clicked_sprite = "utility/speed_down"
+	GuiTemplater.buttons.speed_up.sprite = "speed_up_white"
+	GuiTemplater.buttons.speed_up.hovered_sprite = "utility/speed_up"
+	GuiTemplater.buttons.speed_up.clicked_sprite = "utility/speed_up"
+	GuiTemplater.buttons.spray.sprite = "spray_icon_white"
+	GuiTemplater.buttons.spray.hovered_sprite = "utility/spray_icon"
+	GuiTemplater.buttons.spray.clicked_sprite = "utility/spray_icon"
+	GuiTemplater.buttons.stop.sprite = "stop_white"
+	GuiTemplater.buttons.stop.hovered_sprite = "utility/stop"
+	GuiTemplater.buttons.stop.clicked_sprite = "utility/stop"
+	GuiTemplater.buttons.sync_mods.sprite = "sync_mods_white"
+	GuiTemplater.buttons.sync_mods.hovered_sprite = "utility/sync_mods"
+	GuiTemplater.buttons.sync_mods.clicked_sprite = "utility/sync_mods"
+	GuiTemplater.buttons.questionmark.sprite = "questionmark_white"
+	GuiTemplater.buttons.questionmark.hovered_sprite = "utility/questionmark"
+	GuiTemplater.buttons.questionmark.clicked_sprite = "utility/questionmark"
+	GuiTemplater.buttons.missing_icon.sprite = "questionmark_white"
+	GuiTemplater.buttons.missing_icon.hovered_sprite = "utility/questionmark"
+	GuiTemplater.buttons.missing_icon.clicked_sprite = "utility/questionmark"
+	GuiTemplater.buttons.variations_tool.sprite = "variations_tool_icon_white"
+	GuiTemplater.buttons.variations_tool.hovered_sprite = "utility/variations_tool_icon"
+	GuiTemplater.buttons.variations_tool.clicked_sprite = "utility/variations_tool_icon"
+	GuiTemplater.buttons.copy.sprite = "copy_white"
+	GuiTemplater.buttons.copy.hovered_sprite = "utility/copy"
+	GuiTemplater.buttons.copy.clicked_sprite = "utility/copy"
+	GuiTemplater.buttons.export_slot.sprite = "export_slot_white"
+	GuiTemplater.buttons.export_slot.hovered_sprite = "utility/export_slot"
+	GuiTemplater.buttons.export_slot.clicked_sprite = "utility/export_slot"
 end
-for _, button in pairs(ZOGuiTemplater.buttons) do
+for _, button in pairs(GuiTemplater.buttons) do
 	if button.type == nil then
 		button.type = "sprite-button"
 	end
 end
 
 
-ZOGuiTemplater.frames = {
+GuiTemplater.frames = {
+	frame          = {style = "frame", direction = "horizontal"},
+	vertical_frame = {style = "frame", direction = "vertical"},
 	borderless_frame     = {style = "borderless_frame"},
 	inside_shallow_frame = {style = "inside_shallow_frame"},
 	subheader_frame      = {style = "subheader_frame"},
 	subpanel_frame       = {style = "subpanel_frame"},
 }
 if script.active_mods["zk-lib"] then
-	ZOGuiTemplater.frames.zk_transparent_frame      = {style = "zk_transparent_frame"}
-	ZOGuiTemplater.frames.zk_dark_transparent_frame = {style = "zk_dark_transparent_frame"}
+	GuiTemplater.frames.zk_transparent_frame      = {style = "zk_transparent_frame"}
+	GuiTemplater.frames.zk_dark_transparent_frame = {style = "zk_dark_transparent_frame"}
 end
-for _, data in pairs(ZOGuiTemplater.frames) do
+for _, data in pairs(GuiTemplater.frames) do
 	data.type = "frame"
 end
 
 
-ZOGuiTemplater.tables = {
+GuiTemplater.tables = {
 	graphics_settings_table = {style = "graphics_settings_table"},
 }
-for _, data in pairs(ZOGuiTemplater.tables) do
+for _, data in pairs(GuiTemplater.tables) do
 	data.type = "table"
 end
 
 
-ZOGuiTemplater.labels = {
+GuiTemplater.labels = {
 	graphics_settings_table = {style = "caption_label"},
 }
-for _, data in pairs(ZOGuiTemplater.labels) do
+for _, data in pairs(GuiTemplater.labels) do
 	data.type = "label"
 end
 
@@ -533,7 +543,7 @@ local function _checkEvents(_template_data)
 	local is_valid = true
 	if _template_data.element.name == nil then
 		is_valid = false
-		ZOGuiTemplater._log("There's no name for GuiElement")
+		GuiTemplater._log("There's no name for GuiElement")
 	end
 
 	for k, v in pairs(_template_data) do
@@ -552,15 +562,15 @@ local function _checkEvents(_template_data)
 					event = defines.events[event]
 					event_data[1] = event
 				else
-					local hidden_event = ZOGuiTemplater.__events[event]
+					local hidden_event = GuiTemplater.__events[event]
 					if hidden_event then
 						_template_data[event] = event_data[2]
 					end
 					goto continue
 				end
 			end
-			local events_GUIs = ZOGuiTemplater.events_GUIs
-			ZOGuiTemplater.events[event] = ZOGuiTemplater.events[event] or
+			local events_GUIs = GuiTemplater.events_GUIs
+			GuiTemplater.events[event] = GuiTemplater.events[event] or
 				---@param e EventData
 				function(e)
 				local element = e.element
@@ -585,7 +595,7 @@ end
 
 ---@param init_data ZOGuiTemplater.data
 ---@return ZOGuiTemplate
-function ZOGuiTemplater.create(init_data)
+function GuiTemplater.create(init_data)
 	---@class ZOGuiTemplate
 	local template = init_data
 
@@ -604,12 +614,12 @@ function ZOGuiTemplater.create(init_data)
 
 		local is_ok, newGui, result
 		local element = template_data.element
-		if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
+		if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
 			newGui = gui.add(element)
 		else
 			is_ok, newGui = pcall(gui.add, element)
 			if not is_ok then
-				ZOGuiTemplater._log(newGui, player)
+				GuiTemplater._log(newGui, player)
 				-- Try to fix buttons, styles
 				local function fix()
 					if element.type == "sprite-button" and newGui:find("Unknown sprite") then
@@ -618,14 +628,14 @@ function ZOGuiTemplater.create(init_data)
 						element.clicked_sprite = nil
 						is_ok, newGui = pcall(gui.add, element)
 						if not is_ok then
-							ZOGuiTemplater._log(newGui, player)
+							GuiTemplater._log(newGui, player)
 							fix()
 						end
 					elseif newGui:find("Unknown style") then
 						element.style = nil
 						is_ok, newGui = pcall(gui.add, element)
 						if not is_ok then
-							ZOGuiTemplater._log(newGui, player)
+							GuiTemplater._log(newGui, player)
 							fix()
 						end
 					end
@@ -647,12 +657,12 @@ function ZOGuiTemplater.create(init_data)
 		end
 
 		if template_data.on_create then
-			if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
+			if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
 				template_data.on_create(newGui)
 			else
 				is_ok, result = pcall(template_data.on_create, newGui)
 				if not is_ok then
-					ZOGuiTemplater._log(result, player)
+					GuiTemplater._log(result, player)
 					return false
 				end
 			end
@@ -665,14 +675,14 @@ function ZOGuiTemplater.create(init_data)
 			for i=1, #children do
 				is_ok, result = template.createGUIs(newGui, children[i], player)
 				if not is_ok then
-					ZOGuiTemplater._log(result, player)
+					GuiTemplater._log(result, player)
 					return false
 				end
 			end
 		end
 
 		if template_data.on_finish then
-			if template_data.raise_error or (ZOGuiTemplater.raise_error and template_data.raise_error ~= false) then
+			if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
 				template_data.on_finish(newGui)
 			else
 				is_ok = pcall(template_data.on_finish, newGui)
@@ -690,7 +700,7 @@ function ZOGuiTemplater.create(init_data)
 		if targetGui and targetGui.valid then
 			local is_ok = true
 			if init_data.on_pre_destroy then
-				if init_data.raise_error or (ZOGuiTemplater.raise_error and init_data.raise_error ~= false) then
+				if init_data.raise_error or (GuiTemplater.raise_error and init_data.raise_error ~= false) then
 					init_data.on_pre_destroy(targetGui)
 				else
 					is_ok = pcall(init_data.on_pre_destroy, targetGui)
@@ -712,7 +722,7 @@ function ZOGuiTemplater.create(init_data)
 		if targetGui and targetGui.valid then
 			local is_ok = true
 			if init_data.on_pre_clear then
-				if init_data.raise_error or (ZOGuiTemplater.raise_error and init_data.raise_error ~= false) then
+				if init_data.raise_error or (GuiTemplater.raise_error and init_data.raise_error ~= false) then
 					init_data.on_pre_clear(targetGui)
 				else
 					is_ok = pcall(init_data.on_pre_clear, targetGui)
@@ -733,7 +743,7 @@ end
 ---@param frame_name string
 ---@param title string|table?
 ---@return LuaGuiElement
-ZOGuiTemplater.create_screen_window = function(player, frame_name, title)
+GuiTemplater.create_screen_window = function(player, frame_name, title)
 	local screen = player.gui.screen
 	local prev_location
 	if screen[frame_name] then
@@ -754,14 +764,14 @@ ZOGuiTemplater.create_screen_window = function(player, frame_name, title)
 			ignored_by_interaction = true
 		}
 	end
-	local drag_handler = top_flow.add(ZOGuiTemplater.drag_handler)
+	local drag_handler = top_flow.add(GuiTemplater.drag_handler)
 	drag_handler.drag_target = main_frame
 	drag_handler.style.horizontally_stretchable = true
 	drag_handler.style.vertically_stretchable   = true
 	drag_handler.style.margin = 0
-	top_flow.add(ZOGuiTemplater.buttons._close)
+	top_flow.add(GuiTemplater.buttons._close)
 
-	local shallow_frame = main_frame.add(ZOGuiTemplater.frames.inside_shallow_frame)
+	local shallow_frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 	shallow_frame.style.padding = 8
 
 	if prev_location then
@@ -777,14 +787,14 @@ end
 ---@param tableGUI LuaGuiElement
 ---@param minimal_width integer?
 ---@return LuaGuiElement
-function ZOGuiTemplater.make_table_as_list(tableGUI, minimal_width)
+function GuiTemplater.make_table_as_list(tableGUI, minimal_width)
 	local style = tableGUI.style
 	style.horizontal_spacing = 16
 	style.vertical_spacing = 8
 	style.top_margin = -16 -- perhaps wrong without minimal_width
 	local column_alignments = style.column_alignments
 
-	local EMPTY_WIDGET = ZOGuiTemplater.empty_widget
+	local EMPTY_WIDGET = GuiTemplater.empty_widget
 	for i = 1, tableGUI.column_count do
 		column_alignments[i] = "center"
 		if minimal_width then
@@ -801,12 +811,63 @@ function ZOGuiTemplater.make_table_as_list(tableGUI, minimal_width)
 end
 
 
+---@param gui LuaGuiElement
+---@param name string?
+---@param anchor GuiAnchor
+---@return LuaGuiElement
+function GuiTemplater.create_frame_for_top_relative_gui(gui, name, anchor)
+	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
+	local style = main_frame.style
+	style.vertical_align = "center"
+	style.horizontally_stretchable = false
+	style.bottom_margin = -14
+	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
+	frame.style.right_padding = 6
+
+	return frame
+end
+
+
+---@param gui LuaGuiElement
+---@param name string?
+---@param anchor GuiAnchor
+---@return LuaGuiElement
+function GuiTemplater.create_frame_for_left_relative_gui(gui, name, anchor)
+	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
+	main_frame.style.right_margin = -14
+	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
+
+	return frame
+end
+
+
+---@param gui LuaGuiElement
+---@param sprite_path string
+---@param name string?
+---@return LuaGuiElement
+function GuiTemplater.create_slot_button(gui, sprite_path, name)
+	local button = gui.add(GuiTemplater.buttons.slot_button)
+	if name then
+		button.name = name
+	end
+
+	if game.is_valid_sprite_path(sprite_path) then
+		button.sprite = sprite_path
+	else
+		GuiTemplater._log("Unknown sprite: " .. sprite_path)
+		button.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
+	end
+
+	return button
+end
+
+
 if script.active_mods["zk-lib"] then
 	---WARNING: Requires zk-lib!
 	---@param player LuaPlayer
 	---@param frame_name string
 	---@return LuaGuiElement
-	function ZOGuiTemplater.create_horizontal_transparent_frame(player, frame_name)
+	function GuiTemplater.create_horizontal_transparent_frame(player, frame_name)
 		local screen = player.gui.screen
 		local prev_location
 		if screen[frame_name] then
@@ -814,15 +875,15 @@ if script.active_mods["zk-lib"] then
 			screen[frame_name].destroy()
 		end
 
-		local top_frame = screen.add(ZOGuiTemplater.frames.borderless_frame)
+		local top_frame = screen.add(GuiTemplater.frames.borderless_frame)
 		top_frame.location = prev_location or {x=55, y=55}
 		top_frame.name = frame_name
 
-		ZOGuiTemplater.frames.zk_transparent_frame.direction = "horizontal"
-		local transparent_frame = top_frame.add(ZOGuiTemplater.frames.zk_transparent_frame)
-		ZOGuiTemplater.frames.zk_transparent_frame.direction = nil
+		GuiTemplater.frames.zk_transparent_frame.direction = "horizontal"
+		local transparent_frame = top_frame.add(GuiTemplater.frames.zk_transparent_frame)
+		GuiTemplater.frames.zk_transparent_frame.direction = nil
 
-		local drag_handler = top_frame.add(ZOGuiTemplater.drag_handler)
+		local drag_handler = top_frame.add(GuiTemplater.drag_handler)
 		drag_handler.drag_target = top_frame
 		local style = drag_handler.style
 		style.horizontally_stretchable = false
@@ -839,7 +900,7 @@ if script.active_mods["zk-lib"] then
 	---@param player LuaPlayer
 	---@param frame_name string
 	---@return LuaGuiElement
-	function ZOGuiTemplater.create_vertical_transparent_frame(player, frame_name)
+	function GuiTemplater.create_vertical_transparent_frame(player, frame_name)
 		local screen = player.gui.screen
 		local prev_location
 		if screen[frame_name] then
@@ -847,16 +908,16 @@ if script.active_mods["zk-lib"] then
 			screen[frame_name].destroy()
 		end
 
-		ZOGuiTemplater.frames.borderless_frame.direction = "vertical"
-		local top_frame = screen.add(ZOGuiTemplater.frames.borderless_frame)
-		ZOGuiTemplater.frames.borderless_frame.direction = nil
+		GuiTemplater.frames.borderless_frame.direction = "vertical"
+		local top_frame = screen.add(GuiTemplater.frames.borderless_frame)
+		GuiTemplater.frames.borderless_frame.direction = nil
 		top_frame.location = prev_location or {x=55, y=55}
 		top_frame.name = frame_name
 
-		local flow = top_frame.add(ZOGuiTemplater.flow)
-		flow.add(ZOGuiTemplater.empty_widget).style.horizontally_stretchable = true
+		local flow = top_frame.add(GuiTemplater.flow)
+		flow.add(GuiTemplater.empty_widget).style.horizontally_stretchable = true
 
-		local drag_handler = flow.add(ZOGuiTemplater.drag_handler)
+		local drag_handler = flow.add(GuiTemplater.drag_handler)
 		drag_handler.drag_target = top_frame
 		local style = drag_handler.style
 		style.horizontally_stretchable = false
@@ -865,9 +926,9 @@ if script.active_mods["zk-lib"] then
 		style.width  = 28
 		style.height = 16
 
-		ZOGuiTemplater.frames.zk_transparent_frame.direction = "vertical"
-		local transparent_frame = top_frame.add(ZOGuiTemplater.frames.zk_transparent_frame)
-		ZOGuiTemplater.frames.zk_transparent_frame.direction = nil
+		GuiTemplater.frames.zk_transparent_frame.direction = "vertical"
+		local transparent_frame = top_frame.add(GuiTemplater.frames.zk_transparent_frame)
+		GuiTemplater.frames.zk_transparent_frame.direction = nil
 
 		return transparent_frame
 	end
@@ -876,10 +937,10 @@ end
 
 ---@param message string|table
 ---@param player LuaPlayer?
-ZOGuiTemplater._log = function(message, player)
+GuiTemplater._log = function(message, player)
 	log(message)
 
-	if not ZOGuiTemplater.print_errors_to_admins then return end
+	if not GuiTemplater.print_errors_to_admins then return end
 	if not (game and game.connected_players) then return end
 
 	local RED_COLOR = {1, 0, 0}
@@ -891,7 +952,7 @@ ZOGuiTemplater._log = function(message, player)
 end
 
 
-ZOGuiTemplater.__events = {
+GuiTemplater.__events = {
 	on_create = true,
 	on_finish = true,
 	on_pre_destroy = true,
@@ -899,4 +960,4 @@ ZOGuiTemplater.__events = {
 }
 
 
-return ZOGuiTemplater
+return GuiTemplater
