@@ -3,7 +3,7 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 11}
+local GuiTemplater = {build = 12}
 
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {}
@@ -124,7 +124,6 @@ GuiTemplater.buttons = {
 	equipment_grid   = {sprite = "utility/equipment_grid"},
 	not_available    = {sprite = "utility/not_available"},
 	restart_required = {sprite = "restart_required"},
-	slot_button  = {sprite = "utility/slot_button"},
 	player       = {sprite = "utility/player_force_icon"},
 	too_far      = {sprite = "utility/too_far"},
 	danger_icon  = {sprite = "utility/danger_icon"},
