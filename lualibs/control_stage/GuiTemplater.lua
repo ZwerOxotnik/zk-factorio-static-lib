@@ -3,7 +3,7 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 12}
+local GuiTemplater = {build = 13}
 
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {}
@@ -54,30 +54,30 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
 ---@field admin_only?  boolean # Creates GUI if player is admin
 ---@field raise_error? boolean
----@field on_gui_selection_state_changed? ZOGuiTemplate.event_func
----@field on_gui_checked_state_changed? ZOGuiTemplate.event_func
----@field on_gui_click? ZOGuiTemplate.event_func
----@field on_gui_closed? ZOGuiTemplate.event_func
----@field on_gui_confirmed? ZOGuiTemplate.event_func
----@field on_gui_elem_changed? ZOGuiTemplate.event_func
----@field on_gui_hover? ZOGuiTemplate.event_func
----@field on_gui_leave? ZOGuiTemplate.event_func
----@field on_gui_location_changed? ZOGuiTemplate.event_func
----@field on_gui_opened? ZOGuiTemplate.event_func
----@field on_gui_selected_tab_changed? ZOGuiTemplate.event_func
----@field on_gui_switch_state_changed? ZOGuiTemplate.event_func
----@field on_gui_text_changed? ZOGuiTemplate.event_func
----@field on_gui_value_changed? ZOGuiTemplate.event_func
+---@field on_gui_selection_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_selection_state_changed)
+---@field on_gui_checked_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_checked_state_changed)
+---@field on_gui_click? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_click)
+---@field on_gui_closed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_closed)
+---@field on_gui_confirmed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_confirmed)
+---@field on_gui_elem_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_elem_changed)
+---@field on_gui_hover? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_hover)
+---@field on_gui_leave? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_leave)
+---@field on_gui_location_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_location_changed)
+---@field on_gui_opened? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_opened)
+---@field on_gui_selected_tab_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_selected_tab_changed)
+---@field on_gui_switch_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_switch_state_changed)
+---@field on_gui_text_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_text_changed)
+---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
 --TODO: create_for_new_players, create_for_joined_players, destroy_for_left_players
 
 
 ---@class ZOGuiTemplate: ZOGuiTemplater.data
 ---@field createGUIs  fun(gui: LuaGuiElement?): boolean
----@field destroyGUIs fun(gui: LuaGuiElement?): boolean
----@field clear       fun(gui: LuaGuiElement?): boolean
+---@field destroyGUIs fun(gui: LuaGuiElement?): boolean -- WARNING: It doesn't trigger child events yet
+---@field clear       fun(gui: LuaGuiElement?): boolean -- WARNING: It doesn't trigger child events yet
 
 
-GuiTemplater.drag_handler  = {type = "empty-widget", name = "drag_handler", style = "draggable_space"}
+GuiTemplater.drag_handler  = {type = "empty-widget", style = "draggable_space"}
 GuiTemplater.empty_widget  = {type = "empty-widget"}
 GuiTemplater.flow          = {type = "flow", direction = "horizontal"}
 GuiTemplater.vertical_flow = {type = "flow", direction = "vertical"}
@@ -229,7 +229,6 @@ GuiTemplater.buttons = {
 		clicked_sprite = "utility/map_exchange_string"
 	},
 	lua_snippet_tool = {
-		name = "UB_run_public_script",
 		style = "frame_action_button",
 		sprite = "lua_snippet_tool_icon_white",
 		hovered_sprite = "utility/lua_snippet_tool_icon",
@@ -739,8 +738,10 @@ GuiTemplater.create_screen_window = function(player, frame_name, title)
 		prev_location = screen[frame_name].location
 		screen[frame_name].destroy()
 	end
-	local main_frame = screen.add{type = "frame", name = frame_name, direction = "vertical"}
-	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work
+
+	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
+	main_frame.name = frame_name
+	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work, probably
 	main_frame.style.padding = 4
 
 	local top_flow = main_frame.add{type = "flow"}
@@ -856,7 +857,7 @@ function GuiTemplater.create_slot_button(gui, sprite_path, name)
 	if game.is_valid_sprite_path(sprite_path) then
 		button.sprite = sprite_path
 	else
-		GuiTemplater._log("Unknown sprite: " .. sprite_path)
+		GuiTemplater._log("Unknown sprite: " .. sprite_path, game.get_player(gui.player_index))
 		button.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
 	end
 
