@@ -1,9 +1,9 @@
---- Quite simple semi-agnostic library to handle GUIs in almost data-driven manner, fixing missing sprites, styles.
+--- Quite simple semi-agnostic library to handle GUIs in almost data-driven manner, fixing missing sprites, styles, same names.
 --- Turn zk-lib on to get better icons, functions, styles.
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 10}
+local GuiTemplater = {build = 11}
 
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {}
@@ -25,6 +25,8 @@ GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor
 GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
 GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
 GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
+GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
+
 
 --Requires zk-lib!
 GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
@@ -41,7 +43,7 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 
 
 ---@class ZOGuiTemplater.data: table
----@field element LuaGuiElement
+---@field element LuaGuiElement.add_param
 ---@field on_create? fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field on_finish? fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field on_pre_destroy? fun(gui: LuaGuiElement) # WARNING: works only for top element
@@ -631,32 +633,9 @@ function GuiTemplater.create(init_data)
 		if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
 			newGui = gui.add(element)
 		else
-			is_ok, newGui = pcall(gui.add, element)
+			is_ok, newGui = GuiTemplater.create_GUI_safely(gui, element, player)
 			if not is_ok then
-				-- Try to fix buttons, styles
-				local function fix()
-					GuiTemplater._log(newGui, player)
-					if element.type == "sprite-button" and newGui:find("Unknown sprite") then
-						element.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
-						element.hovered_sprite = nil
-						element.clicked_sprite = nil
-						is_ok, newGui = pcall(gui.add, element)
-						if not is_ok then
-							fix()
-						end
-					elseif newGui:find("Unknown style") then
-						element.style = nil
-						is_ok, newGui = pcall(gui.add, element)
-						if not is_ok then
-							fix()
-						end
-					end
-				end
-				fix()
-
-				if not is_ok then
-					return false
-				end
+				return false
 			end
 		end
 
@@ -956,6 +935,35 @@ if script.active_mods["zk-lib"] then
 
 		return transparent_frame
 	end
+end
+
+
+-- Tries to fix buttons, styles, same names
+---@param gui LuaGuiElement
+---@param element LuaGuiElement.add_param
+---@param player LuaPlayer?
+---@return boolean, LuaGuiElement|string
+GuiTemplater.create_GUI_safely = function(gui, element, player)
+	local is_ok, newGui = pcall(gui.add, element)
+	if is_ok then
+		return true, newGui
+	end
+	GuiTemplater._log(newGui, player)
+
+	if element.type == "sprite-button" and newGui:find("^Unknown sprite") then
+		element.sprite = "utility/missing_icon" -- or utility/missing_mod_icon
+		element.hovered_sprite = nil
+		element.clicked_sprite = nil
+		return GuiTemplater.create_GUI_safely(gui, element, player)
+	elseif newGui:find("^Unknown style") then
+		element.style = nil
+		return GuiTemplater.create_GUI_safely(gui, element, player)
+	elseif newGui:find("^Gui element with name ") then
+		element.name = nil
+		return GuiTemplater.create_GUI_safely(gui, element, player)
+	end
+
+	return false, newGui
 end
 
 
