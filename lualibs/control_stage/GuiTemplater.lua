@@ -3,10 +3,8 @@
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 
-local GuiTemplater = {build = 13}
+local GuiTemplater = {build = 14}
 
----@type table<uint, fun(event: EventData)>
-GuiTemplater.events = {}
 ---@type table<string, ZOGuiTemplate.event_func>
 GuiTemplater.events_GUIs = {
 	[script.mod_name .. "_close"] = function(element, player, event)
@@ -15,6 +13,48 @@ GuiTemplater.events_GUIs = {
 }
 GuiTemplater.raise_error = false
 GuiTemplater.print_errors_to_admins = true
+---@type table<uint, fun(event: EventData)>
+GuiTemplater.events = {
+	[defines.events.on_player_created] = function(event)
+		local player = game.get_player(event.player_index)
+		if not (player and player.valid) then return end
+
+		local templates_for_new_players = GuiTemplater.templates_for_new_players
+		for i = 1, #templates_for_new_players do
+			local template = templates_for_new_players[i]
+			local gui = player.gui[template.create_for_new_players]
+			template.createGUIs(gui)
+		end
+	end,
+	[defines.events.on_player_joined_game] = function(event)
+		local player = game.get_player(event.player_index)
+		if not (player and player.valid) then return end
+
+		local templates_for_joined_players = GuiTemplater.templates_for_joined_players
+		for i = 1, #templates_for_joined_players do
+			local template = templates_for_joined_players[i]
+			local gui = player.gui[template.create_for_joined_players]
+			template.createGUIs(gui)
+		end
+	end,
+	[defines.events.on_player_left_game] = function(event)
+		local player = game.get_player(event.player_index)
+		if not (player and player.valid) then return end
+
+		local templates_for_left_players = GuiTemplater.templates_for_left_players
+		for i = 1, #templates_for_left_players do
+			local template = templates_for_left_players[i]
+			local gui = player.gui[template.destroy_for_left_players]
+			template.destroyGUIs(gui)
+		end
+	end,
+}
+---@type ZOGuiTemplate[]
+GuiTemplater.templates_for_new_players = {}
+---@type ZOGuiTemplate[]
+GuiTemplater.templates_for_joined_players = {}
+---@type ZOGuiTemplate[]
+GuiTemplater.templates_for_left_players = {}
 
 
 --[[
@@ -42,6 +82,14 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ---@field [2] ZOGuiTemplate.event_func
 
 
+---@alias rootGUIname
+---| "top"
+---| "left"
+---| "center"
+---| "goal"
+---| "screen"
+
+
 ---@class ZOGuiTemplater.data: table
 ---@field element LuaGuiElement.add_param
 ---@field on_create? fun(gui: LuaGuiElement) # WARNING: works only for top element
@@ -54,6 +102,9 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
 ---@field admin_only?  boolean # Creates GUI if player is admin
 ---@field raise_error? boolean
+---@field create_for_new_players?    rootGUIname # WARNING: works only for top element
+---@field create_for_joined_players? rootGUIname # WARNING: works only for top element
+---@field destroy_for_left_players?  rootGUIname # WARNING: works only for top element
 ---@field on_gui_selection_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_selection_state_changed)
 ---@field on_gui_checked_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_checked_state_changed)
 ---@field on_gui_click? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_click)
@@ -68,7 +119,6 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ---@field on_gui_switch_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_switch_state_changed)
 ---@field on_gui_text_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_text_changed)
 ---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
---TODO: create_for_new_players, create_for_joined_players, destroy_for_left_players
 
 
 ---@class ZOGuiTemplate: ZOGuiTemplater.data
@@ -81,7 +131,6 @@ GuiTemplater.drag_handler  = {type = "empty-widget", style = "draggable_space"}
 GuiTemplater.empty_widget  = {type = "empty-widget"}
 GuiTemplater.flow          = {type = "flow", direction = "horizontal"}
 GuiTemplater.vertical_flow = {type = "flow", direction = "vertical"}
-
 
 GuiTemplater.buttons = {
 	confirm_button = {type = "button", style = "confirm_button", caption = {"gui.confirm"}},
@@ -599,6 +648,19 @@ local function _checkEvents(_template_data)
 		end
 	end
 
+	if _template_data.create_for_new_players then
+		local tempalates = GuiTemplater.templates_for_new_players
+		tempalates[#tempalates+1] = _template_data
+	end
+	if _template_data.create_for_joined_players then
+		local tempalates = GuiTemplater.templates_for_joined_players
+		tempalates[#tempalates+1] = _template_data
+	end
+	if _template_data.destroy_for_left_players then
+		local tempalates = GuiTemplater.templates_for_left_players
+		tempalates[#tempalates+1] = _template_data
+	end
+
 	local children = _template_data.children
 	if not children then return end
 	for i=1, #children do
@@ -700,7 +762,6 @@ function GuiTemplater.create(init_data)
 		end
 		return false
 	end
-
 
 	---@param gui LuaGuiElement
 	template.clear = function(gui)
