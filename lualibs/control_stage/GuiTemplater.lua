@@ -24,7 +24,7 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ]]
 
 
-local GuiTemplater = {build = 16}
+local GuiTemplater = {build = 17}
 
 ---@type table<string, ZOGuiTemplate.event_func>
 GuiTemplater.events_GUIs = {
@@ -102,7 +102,7 @@ GuiTemplater.templates_for_left_players = {}
 ---@field on_pre_clear?   fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field event?  ZOGuiTemplater.event
 ---@field events? ZOGuiTemplater.event[]
----@field children? ZOGuiTemplater.data[]
+---@field children? ZOGuiTemplater.child_data[]
 ---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
 ---@field admin_only?  boolean # Creates GUI if player is admin
 ---@field raise_error? boolean
@@ -125,15 +125,22 @@ GuiTemplater.templates_for_left_players = {}
 ---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
 
 
+---@class ZOGuiTemplater.child_data: ZOGuiTemplater.data
+---@field on_create      nil
+---@field on_finish      nil
+---@field on_pre_destroy nil
+---@field on_pre_clear   nil
+
+
 ---@class ZOGuiTemplater.collapse_data: table
----@field element LuaGuiElement.add_param
+---@field element LuaGuiElement.add_param?
 ---@field on_create? fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field on_finish? fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field on_pre_destroy? fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field on_pre_clear?   fun(gui: LuaGuiElement) # WARNING: works only for top element
 ---@field event?  ZOGuiTemplater.event
 ---@field events? ZOGuiTemplater.event[]
----@field children? ZOGuiTemplater.data[]
+---@field children? ZOGuiTemplater.collapse_child_data[]
 ---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
 ---@field admin_only?  boolean # Creates GUI if player is admin
 ---@field raise_error? boolean
@@ -151,6 +158,14 @@ GuiTemplater.templates_for_left_players = {}
 ---@field on_gui_switch_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_switch_state_changed)
 ---@field on_gui_text_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_text_changed)
 ---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
+
+
+---@class ZOGuiTemplater.collapse_child_data: ZOGuiTemplater.collapse_data
+---@field element LuaGuiElement.add_param
+---@field on_create      nil
+---@field on_finish      nil
+---@field on_pre_destroy nil
+---@field on_pre_clear   nil
 
 
 ---@class ZOGuiTemplate: ZOGuiTemplater.data
@@ -638,23 +653,23 @@ for _, data in pairs(GuiTemplater.labels) do
 end
 
 
----@param _template_data ZOGuiTemplater.data|ZOGuiTemplater.collapse_data
-local function _checkCommonEvents(_template_data)
+---@param template_data ZOGuiTemplater.data | ZOGuiTemplater.child_data | ZOGuiTemplater.collapse_data | ZOGuiTemplater.collapse_child_data
+local function _checkCommonEvents(template_data)
 	local is_valid = true
-	if _template_data.element.name == nil then
+	if template_data.element.name == nil then
 		is_valid = false
 		GuiTemplater._log("There's no name for GuiElement")
 	end
 
-	for k, v in pairs(_template_data) do
+	for k, v in pairs(template_data) do
 		if k:find("^on_gui_") then
-			_template_data.events = _template_data.events or {}
-			_template_data.events[#_template_data.events+1] = {k, v}
+			template_data.events = template_data.events or {}
+			template_data.events[#template_data.events+1] = {k, v}
 		end
 	end
 
-	if is_valid and (_template_data.events or _template_data.event) then
-		for _, event_data in ipairs(_template_data.events or {_template_data.event}) do
+	if is_valid and (template_data.events or template_data.event) then
+		for _, event_data in ipairs(template_data.events or {template_data.event}) do
 			local event = event_data[1]
 			if type(event) == "string" then
 				local event_id = defines.events[event]
@@ -664,7 +679,7 @@ local function _checkCommonEvents(_template_data)
 				else
 					local hidden_event = GuiTemplater.__events[event]
 					if hidden_event then
-						_template_data[event] = event_data[2]
+						template_data[event] = event_data[2]
 					end
 					goto continue
 				end
@@ -680,31 +695,31 @@ local function _checkCommonEvents(_template_data)
 					f(element, game.get_player(e.player_index), e)
 				end
 			end
-			events_GUIs[_template_data.element.name] = event_data[2]
+			events_GUIs[template_data.element.name] = event_data[2]
 		    ::continue::
 		end
 	end
 end
 
 
----@param _template_data ZOGuiTemplater.data
-local function _checkEvents(_template_data)
-	_checkCommonEvents(_template_data)
+---@param template_data ZOGuiTemplater.data | ZOGuiTemplater.child_data
+local function _checkEvents(template_data)
+	_checkCommonEvents(template_data)
 
-	if _template_data.create_for_new_players then
+	if template_data.create_for_new_players then
 		local tempalates = GuiTemplater.templates_for_new_players
-		tempalates[#tempalates+1] = _template_data
+		tempalates[#tempalates+1] = template_data
 	end
-	if _template_data.create_for_joined_players then
+	if template_data.create_for_joined_players then
 		local tempalates = GuiTemplater.templates_for_joined_players
-		tempalates[#tempalates+1] = _template_data
+		tempalates[#tempalates+1] = template_data
 	end
-	if _template_data.destroy_for_left_players then
+	if template_data.destroy_for_left_players then
 		local tempalates = GuiTemplater.templates_for_left_players
-		tempalates[#tempalates+1] = _template_data
+		tempalates[#tempalates+1] = template_data
 	end
 
-	local children = _template_data.children
+	local children = template_data.children
 	if not children then return end
 	for i=1, #children do
 		_checkEvents(children[i])
@@ -712,11 +727,13 @@ local function _checkEvents(_template_data)
 end
 
 
----@param _template_data ZOGuiTemplater.collapse_data
-local function _checkExpanderEvents(_template_data)
-	_checkCommonEvents(_template_data)
+---@param template_data ZOGuiTemplater.collapse_data | ZOGuiTemplater.collapse_child_data
+local function _checkExpanderEvents(template_data)
+	if template_data.element then
+		_checkCommonEvents(template_data)
+	end
 
-	local children = _template_data.children
+	local children = template_data.children
 	if not children then return end
 	for i=1, #children do
 		_checkExpanderEvents(children[i])
@@ -733,7 +750,7 @@ function GuiTemplater.create(init_data)
 	_checkEvents(template)
 
 	template.createGUIs = function(gui, template_data, player)
-		---@cast template_data ZOGuiTemplater.data?
+		---@cast template_data ZOGuiTemplater.data | ZOGuiTemplater.child_data?
 		---@cast player LuaPlayer?
 		if not (gui and gui.valid) then return false end
 		---@type LuaPlayer
@@ -855,7 +872,8 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 
 	_checkExpanderEvents(template)
 
-	GuiTemplater.events_GUIs[expander_name] = function(element, player, event)
+	local events_GUIs = GuiTemplater.events_GUIs
+	events_GUIs[expander_name] = function(element, player, event)
 		local parent = element.parent
 		---@cast parent LuaGuiElement
 		local index, check_element
@@ -889,9 +907,19 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 			template.createGUIs(frame, init_data)
 		end
 	end
+	GuiTemplater.events[defines.events.on_gui_click] = GuiTemplater.events[defines.events.on_gui_click] or
+		---@param e EventData.on_gui_click
+		function(e)
+		local element = e.element
+		if not (element and element.valid) then return end
+		local f = events_GUIs[element.name]
+		if f then
+			f(element, game.get_player(e.player_index), e)
+		end
+	end
 
 	template.createGUIs = function(main_gui, template_data, player)
-		---@cast template_data ZOGuiTemplater.data?
+		---@cast template_data ZOGuiTemplater.collapse_child|ZOGuiTemplater.collapse_child_data?
 		---@cast player LuaPlayer?
 		if not (main_gui and main_gui.valid) then return false end
 		---@type LuaPlayer
@@ -924,41 +952,47 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 			return true
 		end
 
+		local is_init_data = (template_data == nil)
 		template_data = template_data or init_data
 		if template_data.admin_only and not player.admin then return false end
 
 		local is_ok, newGui, result
 		local element = template_data.element
-		if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
-			newGui = main_gui.add(element)
+		if not (not is_init_data and element) then
+			newGui = main_gui
+			is_ok  = true
 		else
-			is_ok, newGui = GuiTemplater.create_GUI_safely(main_gui, element, player)
-			if not is_ok then
-				return false
-			end
-		end
-		---@cast newGui LuaGuiElement
-
-		if template_data.style then
-			local style = newGui.style
-			for k, v in pairs(template_data.style) do
-				style[k] = v
-			end
-		end
-
-		if template_data.on_create then
 			if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
-				template_data.on_create(newGui)
+				newGui = main_gui.add(element)
 			else
-				is_ok, result = pcall(template_data.on_create, newGui)
+				is_ok, newGui = GuiTemplater.create_GUI_safely(main_gui, element, player)
 				if not is_ok then
-					GuiTemplater._log(result, player)
 					return false
 				end
 			end
-		end
+			---@cast newGui LuaGuiElement
 
-		if not newGui.valid then return false end
+			if template_data.style then
+				local style = newGui.style
+				for k, v in pairs(template_data.style) do
+					style[k] = v
+				end
+			end
+
+			if template_data.on_create then
+				if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
+					template_data.on_create(newGui)
+				else
+					is_ok, result = pcall(template_data.on_create, newGui)
+					if not is_ok then
+						GuiTemplater._log(result, player)
+						return false
+					end
+				end
+			end
+
+			if not newGui.valid then return false end
+		end
 
 		local children = template_data.children
 		if children then
