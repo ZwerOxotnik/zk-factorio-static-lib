@@ -2,8 +2,9 @@
 --- Turn zk-lib on to get better icons, functions, styles.
 --- It doesn't use "global" yet.
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
+--- WARNING: DO NOT CREATE/CHANGE TEMPLATES DURING RUNTIME!!!
 
-local GuiTemplater = {build = 14}
+local GuiTemplater = {build = 15}
 
 ---@type table<string, ZOGuiTemplate.event_func>
 GuiTemplater.events_GUIs = {
@@ -59,6 +60,7 @@ GuiTemplater.templates_for_left_players = {}
 
 --[[
 GuiTemplater.create(init_data: ZOGuiTemplater.data): ZOGuiTemplate
+GuiTemplater.create_expander_frame(init_data: ZOGuiTemplater.data, expander_name: string, caption: string|table, is_collapsed=false): ZOGuiExpanderTemplate
 GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string, title: string|table?): LuaGuiElement
 GuiTemplater.make_table_as_list(tableGUI: LuaGuiElement, minimal_column_width: integer?): LuaGuiElement
 GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
@@ -122,10 +124,42 @@ GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: st
 ---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
 
 
+---@class ZOGuiTemplater.collapse_data: table
+---@field element LuaGuiElement.add_param
+---@field on_create? fun(gui: LuaGuiElement) # WARNING: works only for top element
+---@field on_finish? fun(gui: LuaGuiElement) # WARNING: works only for top element
+---@field on_pre_destroy? fun(gui: LuaGuiElement) # WARNING: works only for top element
+---@field on_pre_clear?   fun(gui: LuaGuiElement) # WARNING: works only for top element
+---@field event?  ZOGuiTemplater.event
+---@field events? ZOGuiTemplater.event[]
+---@field children? ZOGuiTemplater.data[]
+---@field style? table<string, any> # see https://lua-api.factorio.com/latest/classes/LuaStyle.html
+---@field admin_only?  boolean # Creates GUI if player is admin
+---@field raise_error? boolean
+---@field on_gui_selection_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_selection_state_changed)
+---@field on_gui_checked_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_checked_state_changed)
+---@field on_gui_click? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_click)
+---@field on_gui_closed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_closed)
+---@field on_gui_confirmed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_confirmed)
+---@field on_gui_elem_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_elem_changed)
+---@field on_gui_hover? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_hover)
+---@field on_gui_leave? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_leave)
+---@field on_gui_location_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_location_changed)
+---@field on_gui_opened? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_opened)
+---@field on_gui_selected_tab_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_selected_tab_changed)
+---@field on_gui_switch_state_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_switch_state_changed)
+---@field on_gui_text_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_text_changed)
+---@field on_gui_value_changed? ZOGuiTemplate.event_func # [Documentation](https://lua-api.factorio.com/latest/events.html#on_gui_value_changed)
+
+
 ---@class ZOGuiTemplate: ZOGuiTemplater.data
 ---@field createGUIs  fun(gui: LuaGuiElement?): boolean
 ---@field destroyGUIs fun(gui: LuaGuiElement?): boolean -- WARNING: It doesn't trigger child events yet
 ---@field clear       fun(gui: LuaGuiElement?): boolean -- WARNING: It doesn't trigger child events yet
+
+
+---@class ZOGuiExpanderTemplate: ZOGuiTemplater.data
+---@field createGUIs  fun(gui: LuaGuiElement?): boolean
 
 
 GuiTemplater.drag_handler  = {type = "empty-widget", style = "draggable_space"}
@@ -596,14 +630,15 @@ end
 
 GuiTemplater.labels = {
 	graphics_settings_table = {style = "caption_label"},
+	bold_label = {style = "bold_label"},
 }
 for _, data in pairs(GuiTemplater.labels) do
 	data.type = "label"
 end
 
 
----@param _template_data ZOGuiTemplater.data
-local function _checkEvents(_template_data)
+---@param _template_data ZOGuiTemplater.data|ZOGuiTemplater.collapse_data
+local function _checkCommonEvents(_template_data)
 	local is_valid = true
 	if _template_data.element.name == nil then
 		is_valid = false
@@ -648,6 +683,12 @@ local function _checkEvents(_template_data)
 		    ::continue::
 		end
 	end
+end
+
+
+---@param _template_data ZOGuiTemplater.data
+local function _checkEvents(_template_data)
+	_checkCommonEvents(_template_data)
 
 	if _template_data.create_for_new_players then
 		local tempalates = GuiTemplater.templates_for_new_players
@@ -666,6 +707,18 @@ local function _checkEvents(_template_data)
 	if not children then return end
 	for i=1, #children do
 		_checkEvents(children[i])
+	end
+end
+
+
+---@param _template_data ZOGuiTemplater.collapse_data
+local function _checkExpanderEvents(_template_data)
+	_checkCommonEvents(_template_data)
+
+	local children = _template_data.children
+	if not children then return end
+	for i=1, #children do
+		_checkExpanderEvents(children[i])
 	end
 end
 
@@ -699,6 +752,7 @@ function GuiTemplater.create(init_data)
 				return false
 			end
 		end
+		---@cast newGui LuaGuiElement
 
 		if template_data.style then
 			local style = newGui.style
@@ -783,6 +837,149 @@ function GuiTemplater.create(init_data)
 			return is_ok
 		end
 		return false
+	end
+
+	return template
+end
+
+
+---@param init_data ZOGuiTemplater.collapse_data
+---@param expander_name string
+---@param caption string|table
+---@param is_collapsed boolean?
+---@return ZOGuiExpanderTemplate
+function GuiTemplater.create_expander_frame(init_data, expander_name, caption, is_collapsed)
+	---@class ZOGuiTemplate
+	local template = init_data
+
+	_checkExpanderEvents(template)
+
+	GuiTemplater.events_GUIs[expander_name] = function(element, player, event)
+		local parent = element.parent
+		---@cast parent LuaGuiElement
+		local index, check_element
+		if parent.type == "flow" and
+			(parent.direction == nil or parent.direction ~= "vertical")
+		then
+			check_element = parent
+			parent = parent.parent
+		else
+			check_element = element
+		end
+
+		local children = parent.children
+		for i=1, #children do
+			if children[i] == check_element then
+				index = i
+			end
+		end
+
+		if element.sprite == GuiTemplater.buttons.collapse.sprite then
+			element.sprite         = GuiTemplater.buttons.expand.sprite
+			element.hovered_sprite = GuiTemplater.buttons.expand.hovered_sprite
+			element.clicked_sprite = GuiTemplater.buttons.expand.clicked_sprite
+			local frame = parent.children[index+1]
+			frame.clear()
+		else
+			element.sprite         = GuiTemplater.buttons.collapse.sprite
+			element.hovered_sprite = GuiTemplater.buttons.collapse.hovered_sprite
+			element.clicked_sprite = GuiTemplater.buttons.collapse.clicked_sprite
+			local frame = parent.children[index+1]
+			template.createGUIs(frame, init_data)
+		end
+	end
+
+	template.createGUIs = function(main_gui, template_data, player)
+		---@cast template_data ZOGuiTemplater.data?
+		---@cast player LuaPlayer?
+		if not (main_gui and main_gui.valid) then return false end
+		---@type LuaPlayer
+		player = player or game.get_player(main_gui.player_index)
+
+		local button
+		if template_data == nil then
+			if (main_gui.type ~= "frame" and main_gui ~= "flow") or
+				((main_gui.type == "frame" or main_gui == "flow") and main_gui.direction ~= "vertical")
+			then
+				main_gui = main_gui.add(GuiTemplater.vertical_flow)
+			end
+
+			local expander
+			button = (is_collapsed and GuiTemplater.buttons.expand) or GuiTemplater.buttons.collapse
+			if not caption then
+				expander = flow.add(button)
+			else
+				local flow = main_gui.add(GuiTemplater.flow)
+				expander = flow.add(button)
+				flow.add(GuiTemplater.labels.bold_label).caption = caption
+			end
+			expander.name = expander_name
+
+			-- TODO: improve \/
+			main_gui = main_gui.add(GuiTemplater.frames.inside_shallow_frame)
+		end
+
+		if button and button == GuiTemplater.buttons.expand then
+			return true
+		end
+
+		template_data = template_data or init_data
+		if template_data.admin_only and not player.admin then return false end
+
+		local is_ok, newGui, result
+		local element = template_data.element
+		if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
+			newGui = main_gui.add(element)
+		else
+			is_ok, newGui = GuiTemplater.create_GUI_safely(main_gui, element, player)
+			if not is_ok then
+				return false
+			end
+		end
+		---@cast newGui LuaGuiElement
+
+		if template_data.style then
+			local style = newGui.style
+			for k, v in pairs(template_data.style) do
+				style[k] = v
+			end
+		end
+
+		if template_data.on_create then
+			if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
+				template_data.on_create(newGui)
+			else
+				is_ok, result = pcall(template_data.on_create, newGui)
+				if not is_ok then
+					GuiTemplater._log(result, player)
+					return false
+				end
+			end
+		end
+
+		if not newGui.valid then return false end
+
+		local children = template_data.children
+		if children then
+			for i=1, #children do
+				is_ok, result = template.createGUIs(newGui, children[i], player)
+				if not is_ok then
+					GuiTemplater._log(result, player)
+					return false
+				end
+			end
+		end
+
+		if template_data.on_finish then
+			if template_data.raise_error or (GuiTemplater.raise_error and template_data.raise_error ~= false) then
+				template_data.on_finish(newGui)
+			else
+				is_ok = pcall(template_data.on_finish, newGui)
+				if not is_ok then return false end
+			end
+		end
+
+		return true
 	end
 
 	return template
@@ -1026,7 +1223,7 @@ if script.active_mods["zk-lib"] then
 end
 
 
--- Tries to fix buttons, styles, same names
+-- It'll try to create gui and fix buttons, styles, same names when an error occurs
 ---@param gui LuaGuiElement
 ---@param element LuaGuiElement.add_param
 ---@param player LuaPlayer?
