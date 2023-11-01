@@ -65,6 +65,7 @@ GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor
 GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
 GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
 GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
+GuiTemplater.create_menu(player: LuaPlayer?, trigger_gui: LuaGuiElement, frame_name: string, offset=30): LuaGuiElement?
 GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
 
 
@@ -902,6 +903,32 @@ function GuiTemplater.create_right_relative_frame(gui, name, anchor)
 	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 
 	return frame
+end
+
+
+---@param player LuaPlayer?
+---@param trigger_gui LuaGuiElement
+---@param frame_name string
+---@param offset integer?
+---@return LuaGuiElement?
+function GuiTemplater.create_menu(player, trigger_gui, frame_name, offset)
+	player = player or game.get_player(trigger_gui.player_index)
+	local screen = player.gui.screen
+	if screen[frame_name] then
+		screen[frame_name].destroy()
+	end
+
+	local frame_location = trigger_gui.location
+	local target_y = frame_location.y + ((offset or 30) * player.display_scale)
+	if player.display_resolution.height <= target_y then
+		return
+	end
+
+	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
+	main_frame.name = frame_name
+	main_frame.location = {x = frame_location.x, y = target_y}
+
+	return main_frame
 end
 
 
