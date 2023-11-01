@@ -4,7 +4,27 @@
 --- WARNING: events "on_*" as fields for "children" weren't implemented yet
 --- WARNING: DO NOT CREATE/CHANGE TEMPLATES DURING RUNTIME!!!
 
-local GuiTemplater = {build = 15}
+
+--[[
+GuiTemplater.create(init_data: ZOGuiTemplater.data): ZOGuiTemplate
+GuiTemplater.create_expander_template(init_data: ZOGuiTemplater.data, expander_name: string, caption: string|table, is_collapsed=false): ZOGuiExpanderTemplate
+GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string, title: string|table?): LuaGuiElement
+GuiTemplater.make_table_as_list(tableGUI: LuaGuiElement, minimal_column_width: integer?): LuaGuiElement
+GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
+GuiTemplater.create_menu(player: LuaPlayer?, trigger_gui: LuaGuiElement, frame_name: string, offset=30): LuaGuiElement?
+GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
+
+
+--Requires zk-lib!
+GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+]]
+
+
+local GuiTemplater = {build = 16}
 
 ---@type table<string, ZOGuiTemplate.event_func>
 GuiTemplater.events_GUIs = {
@@ -56,25 +76,6 @@ GuiTemplater.templates_for_new_players = {}
 GuiTemplater.templates_for_joined_players = {}
 ---@type ZOGuiTemplate[]
 GuiTemplater.templates_for_left_players = {}
-
-
---[[
-GuiTemplater.create(init_data: ZOGuiTemplater.data): ZOGuiTemplate
-GuiTemplater.create_expander_frame(init_data: ZOGuiTemplater.data, expander_name: string, caption: string|table, is_collapsed=false): ZOGuiExpanderTemplate
-GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string, title: string|table?): LuaGuiElement
-GuiTemplater.make_table_as_list(tableGUI: LuaGuiElement, minimal_column_width: integer?): LuaGuiElement
-GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
-GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
-GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
-GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
-GuiTemplater.create_menu(player: LuaPlayer?, trigger_gui: LuaGuiElement, frame_name: string, offset=30): LuaGuiElement?
-GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
-
-
---Requires zk-lib!
-GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
-GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
-]]
 
 
 ---@alias ZOGuiTemplate.event_func fun(element: LuaGuiElement, player: LuaPlayer, event: EventData)
@@ -848,7 +849,7 @@ end
 ---@param caption string|table
 ---@param is_collapsed boolean?
 ---@return ZOGuiExpanderTemplate
-function GuiTemplater.create_expander_frame(init_data, expander_name, caption, is_collapsed)
+function GuiTemplater.create_expander_template(init_data, expander_name, caption, is_collapsed)
 	---@class ZOGuiTemplate
 	local template = init_data
 
