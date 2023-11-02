@@ -21,10 +21,13 @@ GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_pa
 --Requires zk-lib!
 GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
 GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+--Requires zk-lib >= 0.15.7!
+GuiTemplater.create_nerd_action_button24(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
+GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
 ]]
 
 
-local GuiTemplater = {build = 17}
+local GuiTemplater = {build = 18}
 
 ---@type table<string, ZOGuiTemplate.event_func>
 GuiTemplater.events_GUIs = {
@@ -184,16 +187,16 @@ GuiTemplater.flow          = {type = "flow", direction = "horizontal"}
 GuiTemplater.vertical_flow = {type = "flow", direction = "vertical"}
 
 GuiTemplater.buttons = {
-	confirm_button = {type = "button", style = "confirm_button", caption = {"gui.confirm"}},
-	new_game_header_list_box_item = {type = "button", style = "new_game_header_list_box_item"},
-	menu_button_continue = {type = "button", style = "menu_button_continue"},
-	cancel_button  = {type = "button", caption = {"gui-mod-settings.cancel"}},
-	rounded_button = {type = "button", style = "rounded_button"},
-	mini_tool_button_red = {type = "button", style = "mini_tool_button_red"},
-	red_back_button = {type = "button", style = "red_back_button"},
-	red_button = {type = "button", style = "red_button"},
-	tool_button = {type = "button", style = "tool_button"},
-	back_button = {type = "button", style = "back_button"},
+	confirm_button = {style = "confirm_button", caption = {"gui.confirm"}},
+	new_game_header_list_box_item = {style = "new_game_header_list_box_item"},
+	menu_button_continue = {style = "menu_button_continue"},
+	cancel_button  = {caption = {"gui-mod-settings.cancel"}},
+	rounded_button = {style = "rounded_button"},
+	mini_tool_button_red = {style = "mini_tool_button_red"},
+	red_back_button = {style = "red_back_button"},
+	red_button = {style = "red_button"},
+	tool_button = {style = "tool_button"},
+	back_button = {style = "back_button"},
 	plus = {style = "frame_action_button"}, -- from zk-lib
 	missing_icon = {sprite = "utility/missing_icon"},
 	cross_select = {sprite = "utility/cross_select"},
@@ -611,10 +614,69 @@ if script.active_mods["zk-lib"] then
 	GuiTemplater.buttons.export_slot.sprite = "export_slot_white"
 	GuiTemplater.buttons.export_slot.hovered_sprite = "utility/export_slot"
 	GuiTemplater.buttons.export_slot.clicked_sprite = "utility/export_slot"
+	--- Requires zk-lib >= 0.15.7
+	GuiTemplater.buttons.ZO_nerd_action_button24 = {
+		style = "ZO_nerd_action_button24"
+	}
+	GuiTemplater.buttons.ZO_nerd_action_button40 = {
+		style = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-fa-sort_amount_asc"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-fa-sort_amount_desc"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-translate"] = {
+		caption = "[font=SymbolsNerdFont32]󰗊[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-picture_in_picture_top_right"] = {
+		caption = "[font=SymbolsNerdFont32]󰹙[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-map_marker_plus_outline"] = {
+		caption = "[font=SymbolsNerdFont32]󱋸[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-format_annotation_minus"] = {
+		caption = "[font=SymbolsNerdFont32]󰪼[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-format_annotation_plus"] = {
+		caption = "[font=SymbolsNerdFont32]󰙆[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-fa-arrows_alt"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-cod-check_all"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-cod-checklist"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-fa-github"] = {
+		caption = "[font=SymbolsNerdFont32][/font]",
+		style   = "ZO_nerd_action_button40"
+	}
+	GuiTemplater.buttons["nf-md-text_box_edit"] = {
+		caption = "[font=SymbolsNerdFont32]󱩼[/font]",
+		style   = "ZO_nerd_action_button40"
+	}
 end
 for _, button in pairs(GuiTemplater.buttons) do
 	if button.type == nil then
-		button.type = "sprite-button"
+		if button.sprite or button.clicked_sprite or button.hovered_sprite then
+			button.type = "sprite-button"
+		else
+			button.type = "button"
+		end
 	end
 end
 
@@ -1255,6 +1317,46 @@ if script.active_mods["zk-lib"] then
 
 		return transparent_frame
 	end
+
+
+	---Creates a button with style for font: "SymbolsNerdFont16", which looks like a sprite-button with size 16 + 8
+	---WARNING: Requires zk-lib >= 0.15.7!
+	---@param gui LuaGuiElement
+	---@param symbol string?
+	---@param name string?
+	---@return LuaGuiElement
+	function GuiTemplater.create_nerd_action_button24(gui, symbol, name)
+		local new_gui = gui.add(GuiTemplater.buttons.ZO_nerd_action_button24)
+		if name then
+			new_gui.name = gui.name
+		end
+
+		if symbol then
+			new_gui.caption = "[font=SymbolsNerdFont16]" .. symbol .. "[/font]"
+		end
+
+		return gui
+	end
+
+
+	---Creates a button with style for font: "SymbolsNerdFont32", which looks like a sprite-button with size 32 + 8
+	---WARNING: Requires zk-lib >= 0.15.7!
+	---@param gui LuaGuiElement
+	---@param symbol string?
+	---@param name string?
+	---@return LuaGuiElement
+	function GuiTemplater.create_nerd_action_button40(gui, symbol, name)
+		local new_gui = gui.add(GuiTemplater.buttons.ZO_nerd_action_button40)
+		if name then
+			new_gui.name = gui.name
+		end
+
+		if symbol then
+			new_gui.caption = "[font=SymbolsNerdFont32]" .. symbol .. "[/font]"
+		end
+
+		return gui
+	end
 end
 
 
@@ -1263,7 +1365,7 @@ end
 ---@param element LuaGuiElement.add_param
 ---@param player LuaPlayer?
 ---@return boolean, LuaGuiElement|string
-GuiTemplater.create_GUI_safely = function(gui, element, player)
+function GuiTemplater.create_GUI_safely(gui, element, player)
 	local is_ok, newGui = pcall(gui.add, element)
 	if is_ok then
 		return true, newGui
