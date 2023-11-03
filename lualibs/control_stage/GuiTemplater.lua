@@ -27,13 +27,15 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 18}
+local GuiTemplater = {build = 19}
 
----@type table<string, ZOGuiTemplate.event_func>
+---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
-	[script.mod_name .. "_close"] = function(element, player, event)
-		element.parent.parent.destroy()
-	end
+	[defines.events.on_gui_click] = {
+		[script.mod_name .. "_close"] = function(element, player, event)
+			element.parent.parent.destroy()
+		end
+	}
 }
 GuiTemplater.raise_error = false
 GuiTemplater.print_errors_to_admins = true
@@ -746,7 +748,8 @@ local function _checkCommonEvents(template_data)
 					goto continue
 				end
 			end
-			local events_GUIs = GuiTemplater.events_GUIs
+			GuiTemplater.events_GUIs[event] = GuiTemplater.events_GUIs[event] or {}
+			local events_GUIs = GuiTemplater.events_GUIs[event]
 			GuiTemplater.events[event] = GuiTemplater.events[event] or
 				---@param e EventData
 				function(e)
@@ -934,7 +937,9 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 
 	_checkExpanderEvents(template)
 
-	local events_GUIs = GuiTemplater.events_GUIs
+	local on_click_event = defines.events.on_gui_click
+	GuiTemplater.events_GUIs[on_click_event] = GuiTemplater.events_GUIs[on_click_event] or {}
+	local events_GUIs = GuiTemplater.events_GUIs[on_click_event]
 	events_GUIs[expander_name] = function(element, player, event)
 		local parent = element.parent
 		---@cast parent LuaGuiElement
@@ -969,7 +974,7 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 			template.createGUIs(frame, init_data)
 		end
 	end
-	GuiTemplater.events[defines.events.on_gui_click] = GuiTemplater.events[defines.events.on_gui_click] or
+	GuiTemplater.events[on_click_event] = GuiTemplater.events[on_click_event] or
 		---@param e EventData.on_gui_click
 		function(e)
 		local element = e.element
