@@ -37,7 +37,11 @@ GuiTemplater.events_GUIs = {
 		end
 	}
 }
+-- WARNING: DO NOT CHANGE TEMPLATES DURING RUNTIME!!!
 GuiTemplater.raise_error = false
+-- Prevents crashes during events\
+-- WARNING: DO NOT CHANGE TEMPLATES DURING RUNTIME!!!
+GuiTemplater.safe_mode   = true
 GuiTemplater.print_errors_to_admins = true
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {
@@ -750,14 +754,31 @@ local function _checkCommonEvents(template_data)
 			end
 			GuiTemplater.events_GUIs[event] = GuiTemplater.events_GUIs[event] or {}
 			local events_GUIs = GuiTemplater.events_GUIs[event]
-			GuiTemplater.events[event] = GuiTemplater.events[event] or
-				---@param e EventData
-				function(e)
-				local element = e.element
-				if not (element and element.valid) then return end
-				local f = events_GUIs[element.name]
-				if f then
-					f(element, game.get_player(e.player_index), e)
+			if GuiTemplater.safe_mode then
+				GuiTemplater.events[event] = GuiTemplater.events[event] or
+					---@param e EventData
+					function(e)
+					local element = e.element
+					if not (element and element.valid) then return end
+					local f = events_GUIs[element.name]
+					if f then
+						local player = game.get_player(e.player_index)
+						local is_ok, result = pcall(f, element, player, e)
+						if not is_ok then
+							GuiTemplater._log(result, player)
+						end
+					end
+				end
+			else
+				GuiTemplater.events[event] = GuiTemplater.events[event] or
+					---@param e EventData
+					function(e)
+					local element = e.element
+					if not (element and element.valid) then return end
+					local f = events_GUIs[element.name]
+					if f then
+						f(element, game.get_player(e.player_index), e)
+					end
 				end
 			end
 			events_GUIs[template_data.element.name] = event_data[2]
@@ -974,14 +995,33 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 			template.createGUIs(frame, init_data)
 		end
 	end
-	GuiTemplater.events[on_click_event] = GuiTemplater.events[on_click_event] or
-		---@param e EventData.on_gui_click
-		function(e)
-		local element = e.element
-		if not (element and element.valid) then return end
-		local f = events_GUIs[element.name]
-		if f then
-			f(element, game.get_player(e.player_index), e)
+
+	--- Perhaps I should refactor it (see _checkCommonEvents)
+	if GuiTemplater.safe_mode then
+		GuiTemplater.events[on_click_event] = GuiTemplater.events[on_click_event] or
+			---@param e EventData.on_gui_click
+			function(e)
+			local element = e.element
+			if not (element and element.valid) then return end
+			local f = events_GUIs[element.name]
+			if f then
+				local player = game.get_player(e.player_index)
+				local is_ok, result = pcall(f, element, player, e)
+				if not is_ok then
+					GuiTemplater._log(result, player)
+				end
+			end
+		end
+	else
+		GuiTemplater.events[on_click_event] = GuiTemplater.events[on_click_event] or
+			---@param e EventData.on_gui_click
+			function(e)
+			local element = e.element
+			if not (element and element.valid) then return end
+			local f = events_GUIs[element.name]
+			if f then
+				f(element, game.get_player(e.player_index), e)
+			end
 		end
 	end
 
