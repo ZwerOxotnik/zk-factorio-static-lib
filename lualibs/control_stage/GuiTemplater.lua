@@ -8,26 +8,29 @@
 --[[
 GuiTemplater.create(init_data: ZOGuiTemplater.data): ZOGuiTemplate
 GuiTemplater.create_expander_template(init_data: ZOGuiTemplater.data, expander_name: string, caption: string|table, is_collapsed=false): ZOGuiExpanderTemplate
-GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string, title: string|table?): LuaGuiElement
+GuiTemplater.create_screen_window(player: LuaPlayer, frame_name: string?, title: string|table?): content_frameLuaGuiElement, main_frame: LuaGuiElement, top_flow: LuaGuiElement
+GuiTemplater.create_hollow_screen_window(player: LuaPlayer, frame_name: string?, title: string|table?): content_flow: LuaGuiElement, main_frame: LuaGuiElement, top_flow: LuaGuiElement
+GuiTemplater.create_screen_frame(player: LuaPlayer, frame_name: string?, title: string|table?): content_frameLuaGuiElement, main_frame: LuaGuiElement, top_flow: LuaGuiElement
+GuiTemplater.create_hollow_screen_frame(player: LuaPlayer, frame_name: string?, title: string|table?): content_flow: LuaGuiElement, main_frame: LuaGuiElement, top_flow: LuaGuiElement
 GuiTemplater.make_table_as_list(tableGUI: LuaGuiElement, minimal_column_width: integer?): LuaGuiElement
-GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
-GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
-GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement
+GuiTemplater.create_top_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor):   LuaGuiElement, LuaGuiElement
+GuiTemplater.create_left_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor):  LuaGuiElement, LuaGuiElement
+GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anchor: GuiAnchor): LuaGuiElement, LuaGuiElement
 GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
 GuiTemplater.create_menu(player: LuaPlayer?, trigger_gui: LuaGuiElement, frame_name: string, offset=30): LuaGuiElement?
 GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
 
 
 --Requires zk-lib!
-GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
-GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string): LuaGuiElement
+GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string?, location: GuiLocation?): transparent_frame: LuaGuiElement, top_frame: LuaGuiElement
+GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string?, location: GuiLocation?): transparent_frame: LuaGuiElement, top_frame: LuaGuiElement
 --Requires zk-lib >= 0.15.7!
 GuiTemplater.create_nerd_action_button24(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
 GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
 ]]
 
 
-local GuiTemplater = {build = 19}
+local GuiTemplater = {build = 20}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -1129,23 +1132,25 @@ end
 
 
 ---@param player LuaPlayer
----@param frame_name string
+---@param frame_name string?
 ---@param title string|table?
----@return LuaGuiElement
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement # content_frame, main_frame, top_flow
 GuiTemplater.create_screen_window = function(player, frame_name, title)
 	local screen = player.gui.screen
 	local prev_location
-	if screen[frame_name] then
+	if frame_name and screen[frame_name] then
 		prev_location = screen[frame_name].location
 		screen[frame_name].destroy()
 	end
 
 	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
-	main_frame.name = frame_name
+	if frame_name then
+		main_frame.name = frame_name
+	end
 	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work, probably
 	main_frame.style.padding = 4
 
-	local top_flow = main_frame.add{type = "flow"}
+	local top_flow = main_frame.add(GuiTemplater.flow)
 	top_flow.style.horizontal_spacing = 0
 	if title then
 		top_flow.add{
@@ -1171,7 +1176,147 @@ GuiTemplater.create_screen_window = function(player, frame_name, title)
 		main_frame.force_auto_center()
 	end
 
-	return shallow_frame
+	return shallow_frame, main_frame, top_flow
+end
+
+
+---@param player LuaPlayer
+---@param frame_name string
+---@param title string|table?
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement # content_flow, main_frame, top_flow
+GuiTemplater.create_hollow_screen_window = function(player, frame_name, title)
+	local screen = player.gui.screen
+	local prev_location
+	if screen[frame_name] then
+		prev_location = screen[frame_name].location
+		screen[frame_name].destroy()
+	end
+
+	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
+	main_frame.name = frame_name
+	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work, probably
+	main_frame.style.padding = 4
+
+	local top_flow = main_frame.add(GuiTemplater.flow)
+	top_flow.style.horizontal_spacing = 0
+	if title then
+		top_flow.add{
+			type = "label",
+			style = "frame_title",
+			caption = title,
+			ignored_by_interaction = true
+		}
+	end
+	local drag_handler = top_flow.add(GuiTemplater.drag_handler)
+	drag_handler.drag_target = main_frame
+	drag_handler.style.horizontally_stretchable = true
+	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.margin = 0
+	top_flow.add(GuiTemplater.buttons._close)
+
+	local vertical_flow = main_frame.add(GuiTemplater.vertical_flow)
+	vertical_flow.style.padding = 2
+
+	if prev_location then
+		main_frame.location = prev_location
+	else
+		main_frame.force_auto_center()
+	end
+
+	return vertical_flow, main_frame, top_flow
+end
+
+---@param player LuaPlayer
+---@param frame_name string?
+---@param title string|table?
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement # content_frame, main_frame, top_flow
+GuiTemplater.create_screen_frame = function(player, frame_name, title)
+	local screen = player.gui.screen
+	local prev_location
+	if frame_name and screen[frame_name] then
+		prev_location = screen[frame_name].location
+		screen[frame_name].destroy()
+	end
+
+	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
+	if frame_name then
+		main_frame.name = frame_name
+	end
+	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work, probably
+	main_frame.style.padding = 4
+
+	local top_flow = main_frame.add(GuiTemplater.flow)
+	top_flow.style.horizontal_spacing = 0
+	if title then
+		top_flow.add{
+			type = "label",
+			style = "frame_title",
+			caption = title,
+			ignored_by_interaction = true
+		}
+	end
+	local drag_handler = top_flow.add(GuiTemplater.drag_handler)
+	drag_handler.drag_target = main_frame
+	drag_handler.style.horizontally_stretchable = true
+	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.margin = 0
+
+	local shallow_frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
+	shallow_frame.style.padding = 8
+
+	if prev_location then
+		main_frame.location = prev_location
+	else
+		main_frame.force_auto_center()
+	end
+
+	return shallow_frame, main_frame, top_flow
+end
+
+
+---@param player LuaPlayer
+---@param frame_name string
+---@param title string|table?
+---@return LuaGuiElement, LuaGuiElement, LuaGuiElement # content_flow, main_frame, top_flow
+GuiTemplater.create_hollow_screen_frame = function(player, frame_name, title)
+	local screen = player.gui.screen
+	local prev_location
+	if screen[frame_name] then
+		prev_location = screen[frame_name].location
+		screen[frame_name].destroy()
+	end
+
+	local main_frame = screen.add(GuiTemplater.frames.vertical_frame)
+	main_frame.name = frame_name
+	-- main_frame.style.horizontal_spacing = 0 -- it doesn't work, probably
+	main_frame.style.padding = 4
+
+	local top_flow = main_frame.add(GuiTemplater.flow)
+	top_flow.style.horizontal_spacing = 0
+	if title then
+		top_flow.add{
+			type = "label",
+			style = "frame_title",
+			caption = title,
+			ignored_by_interaction = true
+		}
+	end
+	local drag_handler = top_flow.add(GuiTemplater.drag_handler)
+	drag_handler.drag_target = main_frame
+	drag_handler.style.horizontally_stretchable = true
+	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.margin = 0
+
+	local vertical_flow = main_frame.add(GuiTemplater.vertical_flow)
+	vertical_flow.style.padding = 2
+
+	if prev_location then
+		main_frame.location = prev_location
+	else
+		main_frame.force_auto_center()
+	end
+
+	return vertical_flow, main_frame, top_flow
 end
 
 
@@ -1205,7 +1350,7 @@ end
 ---@param gui LuaGuiElement
 ---@param name string?
 ---@param anchor GuiAnchor
----@return LuaGuiElement
+---@return LuaGuiElement, LuaGuiElement
 function GuiTemplater.create_top_relative_frame(gui, name, anchor)
 	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
 	local style = main_frame.style
@@ -1215,33 +1360,33 @@ function GuiTemplater.create_top_relative_frame(gui, name, anchor)
 	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 	frame.style.right_padding = 6
 
-	return frame
+	return frame, main_frame
 end
 
 
 ---@param gui LuaGuiElement
 ---@param name string?
 ---@param anchor GuiAnchor
----@return LuaGuiElement
+---@return LuaGuiElement, LuaGuiElement
 function GuiTemplater.create_left_relative_frame(gui, name, anchor)
 	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
 	main_frame.style.right_margin = -14
 	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 
-	return frame
+	return frame, main_frame
 end
 
 
 ---@param gui LuaGuiElement
 ---@param name string?
 ---@param anchor GuiAnchor
----@return LuaGuiElement
+---@return LuaGuiElement, LuaGuiElement
 function GuiTemplater.create_right_relative_frame(gui, name, anchor)
 	local main_frame = gui.add{type = "frame", name = name, anchor = anchor}
 	main_frame.style.left_margin = -14
 	local frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
 
-	return frame
+	return frame, main_frame
 end
 
 
@@ -1295,19 +1440,22 @@ end
 if script.active_mods["zk-lib"] then
 	---WARNING: Requires zk-lib!
 	---@param player LuaPlayer
-	---@param frame_name string
-	---@return LuaGuiElement
-	function GuiTemplater.create_horizontal_transparent_frame(player, frame_name)
+	---@param frame_name string?
+	---@param location GuiLocation?
+	---@return LuaGuiElement, LuaGuiElement #transparent_frame, top_frame
+	function GuiTemplater.create_horizontal_transparent_frame(player, frame_name, location)
 		local screen = player.gui.screen
 		local prev_location
-		if screen[frame_name] then
+		if frame_name and screen[frame_name] then
 			prev_location = screen[frame_name].location
 			screen[frame_name].destroy()
 		end
 
 		local top_frame = screen.add(GuiTemplater.frames.borderless_frame)
-		top_frame.location = prev_location or {x=55, y=55}
-		top_frame.name = frame_name
+		top_frame.location = location or prev_location or {x=55, y=55}
+		if frame_name then
+			top_frame.name = frame_name
+		end
 
 		GuiTemplater.frames.zk_transparent_frame.direction = "horizontal"
 		local transparent_frame = top_frame.add(GuiTemplater.frames.zk_transparent_frame)
@@ -1322,18 +1470,19 @@ if script.active_mods["zk-lib"] then
 		style.width = 19
 		style.height = 25
 
-		return transparent_frame
+		return transparent_frame, top_frame
 	end
 
 
 	---WARNING: Requires zk-lib!
 	---@param player LuaPlayer
-	---@param frame_name string
-	---@return LuaGuiElement
-	function GuiTemplater.create_vertical_transparent_frame(player, frame_name)
+	---@param frame_name string?
+	---@param location GuiLocation?
+	---@return LuaGuiElement, LuaGuiElement #transparent_frame, top_frame
+	function GuiTemplater.create_vertical_transparent_frame(player, frame_name, location)
 		local screen = player.gui.screen
 		local prev_location
-		if screen[frame_name] then
+		if frame_name and screen[frame_name] then
 			prev_location = screen[frame_name].location
 			screen[frame_name].destroy()
 		end
@@ -1341,8 +1490,10 @@ if script.active_mods["zk-lib"] then
 		GuiTemplater.frames.borderless_frame.direction = "vertical"
 		local top_frame = screen.add(GuiTemplater.frames.borderless_frame)
 		GuiTemplater.frames.borderless_frame.direction = nil
-		top_frame.location = prev_location or {x=55, y=55}
-		top_frame.name = frame_name
+		top_frame.location = location or prev_location or {x=55, y=55}
+		if frame_name then
+			top_frame.name = frame_name
+		end
 
 		local flow = top_frame.add(GuiTemplater.flow)
 		flow.add(GuiTemplater.empty_widget).style.horizontally_stretchable = true
@@ -1360,7 +1511,7 @@ if script.active_mods["zk-lib"] then
 		local transparent_frame = top_frame.add(GuiTemplater.frames.zk_transparent_frame)
 		GuiTemplater.frames.zk_transparent_frame.direction = nil
 
-		return transparent_frame
+		return transparent_frame, top_frame
 	end
 
 
