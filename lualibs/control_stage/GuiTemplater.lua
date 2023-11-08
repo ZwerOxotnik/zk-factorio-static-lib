@@ -19,6 +19,8 @@ GuiTemplater.create_right_relative_frame(gui: LuaGuiElement, name: string?, anch
 GuiTemplater.create_slot_button(gui: LuaGuiElement, sprite_path: string, name: string?): LuaGuiElement
 GuiTemplater.create_menu(player: LuaPlayer?, trigger_gui: LuaGuiElement, frame_name: string, offset=30): LuaGuiElement?
 GuiTemplater.create_GUI_safely(gui: LuaGuiElement, element: LuaGuiElement.add_param, player: LuaPlayer?): boolean, LuaGuiElement|string
+GuiTemplater.get_location_by_percentage(player: LuaPlayer, x: number, y: number, offset_x: number?, offset_y: number?): GuiLocation.0
+GuiTemplater.get_location_by_percentage_with_offset(player: LuaPlayer, x: number, y: number, offset_x: number?, offset_y: number?): GuiLocation.0
 
 
 --Requires zk-lib!
@@ -30,7 +32,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 20}
+local GuiTemplater = {build = 21}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -1172,8 +1174,6 @@ GuiTemplater.create_screen_window = function(player, frame_name, title)
 
 	if prev_location then
 		main_frame.location = prev_location
-	else
-		main_frame.force_auto_center()
 	end
 
 	return shallow_frame, main_frame, top_flow
@@ -1219,8 +1219,6 @@ GuiTemplater.create_hollow_screen_window = function(player, frame_name, title)
 
 	if prev_location then
 		main_frame.location = prev_location
-	else
-		main_frame.force_auto_center()
 	end
 
 	return vertical_flow, main_frame, top_flow
@@ -1266,8 +1264,6 @@ GuiTemplater.create_screen_frame = function(player, frame_name, title)
 
 	if prev_location then
 		main_frame.location = prev_location
-	else
-		main_frame.force_auto_center()
 	end
 
 	return shallow_frame, main_frame, top_flow
@@ -1312,8 +1308,6 @@ GuiTemplater.create_hollow_screen_frame = function(player, frame_name, title)
 
 	if prev_location then
 		main_frame.location = prev_location
-	else
-		main_frame.force_auto_center()
 	end
 
 	return vertical_flow, main_frame, top_flow
@@ -1435,6 +1429,43 @@ function GuiTemplater.create_slot_button(gui, sprite_path, name)
 
 	return button
 end
+
+
+---@param player LuaPlayer
+---@param x number
+---@param y number
+---@param offset_x number? # left offset
+---@param offset_y number? # top offset
+---@param min_x number? # left minimum
+---@param min_y number? # top  minimum
+---@param max_x number? # left maximum
+---@param max_y number? # top  maximum
+---@return GuiLocation.0
+function GuiTemplater.get_location_by_percentage(player, x, y, offset_x, offset_y, min_x, min_y, max_x, max_y)
+	if x > 100 then x = 1 end
+	if y > 100 then y = 1 end
+	if x > 1 then x = x / 100 end
+	if y > 1 then y = y / 100 end
+
+	local resolution = player.display_resolution
+	x = resolution.width * x + (offset_x or 0)
+	y = resolution.height * y + (offset_y or 0)
+
+	if x < (min_x or 0) then
+		x = (min_x or 0)
+	elseif x > (max_x or (resolution.width - 20)) then
+		x = (max_x or (resolution.width - 20))
+	end
+
+	if y < (min_y or 0) then
+		y = (min_y or 0)
+	elseif y > (max_y or (resolution.height - 20)) then
+		y = (max_y or (resolution.height - 20))
+	end
+
+	return {x = x, y = y}
+end
+GuiTemplater.get_location_by_percentage_with_offset = GuiTemplater.get_location_by_percentage
 
 
 if script.active_mods["zk-lib"] then
