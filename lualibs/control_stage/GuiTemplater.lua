@@ -32,7 +32,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 21}
+local GuiTemplater = {build = 22}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -42,14 +42,18 @@ GuiTemplater.events_GUIs = {
 		end
 	}
 }
--- WARNING: DO NOT CHANGE TEMPLATES DURING RUNTIME!!!
+local __events_GUIs = GuiTemplater.events_GUIs
+local __on_click_GUIs = __events_GUIs[defines.events.on_gui_click]
+
+-- WARNING: DO NOT CHANGE "raise_error" DURING RUNTIME!!!
 GuiTemplater.raise_error = false
 -- Prevents crashes during events\
--- WARNING: DO NOT CHANGE TEMPLATES DURING RUNTIME!!!
+-- WARNING: DO NOT CHANGE "safe_mode" DURING RUNTIME!!!
 GuiTemplater.safe_mode   = true
 GuiTemplater.print_errors_to_admins = true
 ---@type table<uint, fun(event: EventData)>
 GuiTemplater.events = {
+	---@param event EventData.on_player_created
 	[defines.events.on_player_created] = function(event)
 		local player = game.get_player(event.player_index)
 		if not (player and player.valid) then return end
@@ -61,6 +65,7 @@ GuiTemplater.events = {
 			template.createGUIs(gui)
 		end
 	end,
+	---@param event EventData.on_player_joined_game
 	[defines.events.on_player_joined_game] = function(event)
 		local player = game.get_player(event.player_index)
 		if not (player and player.valid) then return end
@@ -72,6 +77,7 @@ GuiTemplater.events = {
 			template.createGUIs(gui)
 		end
 	end,
+	---@param event EventData.on_player_left_game
 	[defines.events.on_player_left_game] = function(event)
 		local player = game.get_player(event.player_index)
 		if not (player and player.valid) then return end
@@ -81,6 +87,24 @@ GuiTemplater.events = {
 			local template = templates_for_left_players[i]
 			local gui = player.gui[template.destroy_for_left_players]
 			template.destroyGUIs(gui)
+		end
+	end,
+	---@param event EventData.on_gui_click
+	[defines.events.on_gui_click] = function(event)
+		local element = event.element
+		if not (element and element.valid) then return end
+
+		local f = __on_click_GUIs[element.name]
+		if f then
+			local player = game.get_player(event.player_index)
+			if not GuiTemplater.safe_mode then
+				f(element, player, event)
+			else
+				local is_ok, result = pcall(f, element, player, event)
+				if not is_ok then
+					GuiTemplater._log(result, player)
+				end
+			end
 		end
 	end,
 }
@@ -696,7 +720,7 @@ GuiTemplater.frames = {
 	frame          = {style = "frame", direction = "horizontal"},
 	vertical_frame = {style = "frame", direction = "vertical"},
 	borderless_frame     = {style = "borderless_frame"},
-	inside_shallow_frame = {style = "inside_shallow_frame"},
+	inside_shallow_frame = {style = "inside_shallow_frame", direction = "vertical"},
 	subheader_frame      = {style = "subheader_frame"},
 	subpanel_frame       = {style = "subpanel_frame"},
 }
