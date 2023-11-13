@@ -32,7 +32,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 22}
+local GuiTemplater = {build = 23}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -1190,6 +1190,7 @@ GuiTemplater.create_screen_window = function(player, frame_name, title)
 	drag_handler.drag_target = main_frame
 	drag_handler.style.horizontally_stretchable = true
 	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.minimal_width = 20
 	drag_handler.style.margin = 0
 	top_flow.add(GuiTemplater.buttons._close)
 
@@ -1235,6 +1236,7 @@ GuiTemplater.create_hollow_screen_window = function(player, frame_name, title)
 	drag_handler.drag_target = main_frame
 	drag_handler.style.horizontally_stretchable = true
 	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.minimal_width = 20
 	drag_handler.style.margin = 0
 	top_flow.add(GuiTemplater.buttons._close)
 
@@ -1281,6 +1283,7 @@ GuiTemplater.create_screen_frame = function(player, frame_name, title)
 	drag_handler.drag_target = main_frame
 	drag_handler.style.horizontally_stretchable = true
 	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.minimal_width = 20
 	drag_handler.style.margin = 0
 
 	local shallow_frame = main_frame.add(GuiTemplater.frames.inside_shallow_frame)
@@ -1325,6 +1328,7 @@ GuiTemplater.create_hollow_screen_frame = function(player, frame_name, title)
 	drag_handler.drag_target = main_frame
 	drag_handler.style.horizontally_stretchable = true
 	drag_handler.style.vertically_stretchable   = true
+	drag_handler.style.minimal_width = 20
 	drag_handler.style.margin = 0
 
 	local vertical_flow = main_frame.add(GuiTemplater.vertical_flow)
@@ -1522,7 +1526,7 @@ if script.active_mods["zk-lib"] then
 		style.horizontally_stretchable = false
 		style.vertically_stretchable   = false
 		style.margin = 0
-		style.width = 19
+		style.width  = 19
 		style.height = 25
 
 		return transparent_frame, top_frame
