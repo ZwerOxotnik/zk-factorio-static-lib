@@ -27,12 +27,13 @@ GuiTemplater.get_location_by_percentage_with_offset(player: LuaPlayer, x: number
 GuiTemplater.create_horizontal_transparent_frame(player: LuaPlayer, frame_name: string?, location: GuiLocation?): transparent_frame: LuaGuiElement, top_frame: LuaGuiElement
 GuiTemplater.create_vertical_transparent_frame(player: LuaPlayer, frame_name: string?, location: GuiLocation?): transparent_frame: LuaGuiElement, top_frame: LuaGuiElement
 --Requires zk-lib >= 0.15.7!
+GuiTemplater.create_counter_gui(gui: LuaGuiElement, name: string, value: number|string?, allow_decimal=false, allow_negative=false): textfield: LuaGuiElement
 GuiTemplater.create_nerd_action_button24(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
 GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, name: string?): LuaGuiElement
 ]]
 
 
-local GuiTemplater = {build = 23}
+local GuiTemplater = {build = 24}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -717,6 +718,8 @@ end
 
 
 GuiTemplater.frames = {
+	negative_subheader_frame = {style = "negative_subheader_frame"},
+	subfooter_frame = {style = "subfooter_frame"},
 	frame          = {style = "frame", direction = "horizontal"},
 	vertical_frame = {style = "frame", direction = "vertical"},
 	borderless_frame     = {style = "borderless_frame"},
@@ -1459,6 +1462,31 @@ function GuiTemplater.create_slot_button(gui, sprite_path, name)
 end
 
 
+---@param gui LuaGuiElement
+---@param name string
+---@param value number|string?
+---@param allow_decimal boolean?
+---@param allow_negative boolean?
+---@return LuaGuiElement
+function GuiTemplater.create_counter_gui(gui, name, value, allow_decimal, allow_negative)
+	local flow = gui.add(GuiTemplater.flow)
+
+	GuiTemplater.create_nerd_action_button24(flow, "", name .. "_less")
+	local input = flow.add{
+		type = "textfield",
+		name = name,
+		numeric = true,
+		allow_decimal  = allow_decimal,
+		allow_negative = allow_negative,
+		text = value and tostring(value)
+	}
+	input.style.width = 50
+	GuiTemplater.create_nerd_action_button24(flow, "", name .. "_more")
+
+	return input
+end
+
+
 ---@param player LuaPlayer
 ---@param x number
 ---@param y number
@@ -1635,7 +1663,7 @@ function GuiTemplater.create_GUI_safely(gui, element, player)
 	elseif newGui:find("^Unknown style") then
 		element.style = nil
 		return GuiTemplater.create_GUI_safely(gui, element, player)
-	elseif newGui:find("^Gui element with name ") then
+	elseif newGui:find("^Gui element with name ") or newGui:find("^Invalid name ") then
 		element.name = nil
 		return GuiTemplater.create_GUI_safely(gui, element, player)
 	end
