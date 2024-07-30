@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 6}
+local player_util = {build = 7}
 
 
 --[[
@@ -16,6 +16,10 @@ player_util.delete_gui_for_players(players=game.players, source_gui_name, gui_na
 player_util.find_closest_player_to_position(players=game.connected_players, position): LuaPlayer?, uint?
 player_util.find_players_in_radius(players=game.connected_players, position, radius): LuaPlayer[]
 player_util.is_there_player_in_radius(players=game.connected_players, position, radius): boolean
+player_util.has_all_items(player, item_requests, is_return_missing_items=false): boolean, missing_items?
+TODO: player_util.get_all_items(player, item_requests, is_return_missing_items=false): ItemStack[], missing_items?
+player_util.has_any_item(player, item_requests): boolean
+TODO: player_util.get_any_item(player, item_requests): item
 ]]
 
 
@@ -222,25 +226,30 @@ end
 ---@param player LuaPlayer
 ---@param message string
 ---@param is_log boolean?
+---@param is_tag_include boolean? # true by default
 ---@return string?
-function player_util.emulate_message_to_server(player, message, is_log)
-	if type(message) == "string" then
-		local _message
-		local tag = player.tag
-		if tag and tag ~= "" then
-			_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. " " .. player.tag .. ": " .. _message
-		else
-			_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. ": " .. _message
-		end
+function player_util.emulate_message_to_server(player, message, is_log, is_tag_include)
+	if type(message) ~= "string" then return end
 
-		if is_log then
-			log("\r\n" .. _message)
-		else
-			print(_message)
-		end
-
-		return _message
+	if is_tag_include == nil then
+		is_tag_include = true
 	end
+
+	local _message
+	local tag = player.tag
+	if is_tag_include and tag and tag ~= "" then
+		_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. " " .. player.tag .. ": " .. _message
+	else
+		_message = "0000-00-00 00:00:00 [CHAT] " .. player.name .. ": " .. _message
+	end
+
+	if is_log then
+		log("\r\n" .. _message)
+	else
+		print(_message)
+	end
+
+	return _message
 end
 
 
@@ -251,16 +260,19 @@ function player_util.delete_gui_for_players(players, source_gui_name, gui_name)
 	players = players or game.players
 	for _, player in pairs(players) do
 		if player.valid then
-			local gui = player.gui[source_gui_name][gui_name]
-			if gui and gui.valid then
-				gui.destroy()
+			local prev_gui = player.gui[source_gui_name]
+			if prev_gui and prev_gui.valid then
+				local gui = prev_gui[gui_name]
+				if gui and gui.valid then
+					gui.destroy()
+				end
 			end
 		end
 	end
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.connected_players by default
 ---@param position MapPosition
 ---@return LuaPlayer?, uint? # player, distance
 function player_util.find_closest_player_to_position(players, position)
@@ -285,7 +297,7 @@ function player_util.find_closest_player_to_position(players, position)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>?? # game.players by default
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>?? # game.connected_players by default
 ---@param position MapPosition
 ---@return LuaPlayer[]
 function player_util.find_players_in_radius(players, position, radius)
@@ -308,7 +320,7 @@ function player_util.find_players_in_radius(players, position, radius)
 end
 
 
----@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.players by default
+---@param players table<any, LuaPlayer> | LuaCustomTable<any, LuaPlayer>? # game.connected_players by default
 ---@param position MapPosition
 ---@return boolean
 function player_util.is_there_player_in_radius(players, position, radius)
@@ -326,6 +338,54 @@ function player_util.is_there_player_in_radius(players, position, radius)
 			end
 		end
 	end
+	return false
+end
+
+
+---@param player LuaPlayer
+---@param item_requests table<string, uint>
+---@param is_return_missing_items false|nil
+---@return boolean
+---@overload fun(player: LuaPlayer,  item_requests: table<string, uint>, is_return_missing_items: true): boolean, table<string, uint>?
+function player_util.has_all_items(player, item_requests, is_return_missing_items)
+	local get_item_count = player.get_item_count
+	if not is_return_missing_items then
+		for item_name, need_count in pairs(item_requests) do
+			local current_count = get_item_count(item_name)
+			if current_count <= need_count then
+				return false
+			end
+		end
+
+		return true
+	else
+		local has_missing_items = false
+		local missing_items
+		for item_name, need_count in pairs(item_requests) do
+			local current_count = get_item_count(item_name)
+			if current_count <= need_count then
+				missing_items = missing_items or {}
+				missing_items[item_name] = need_count - current_count
+			end
+		end
+
+		return has_missing_items, missing_items
+	end
+end
+
+
+---@param player LuaPlayer
+---@param item_requests table<string, uint>
+---@return boolean
+function player_util.has_any_item(player, item_requests)
+	local get_item_count = player.get_item_count
+	for item_name, need_count in pairs(item_requests) do
+		local current_count = get_item_count(item_name)
+		if current_count >= need_count then
+			return true
+		end
+	end
+
 	return false
 end
 
