@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 9}
+local force_util = {build = 10}
 
 
 --[[
@@ -7,6 +7,9 @@ force_util.get_forces_by_relations(target_force): LuaForce[], LuaForce[], LuaFor
 force_util.get_enemy_forces(force)
 force_util.change_techs_safely(force, techs, field_name, value)
 force_util.change_enabled_techs_safely(force, techs, field_name, value)
+force_util.has_researched_all(force, techs): boolean
+force_util.has_researched_all(force, techs, is_return_rest_by_not_researched_techs): boolean, rest_techs?
+force_util.has_researched_any(force, techs): boolean
 force_util.research_techs_safely(force, techs)
 force_util.research_enabled_techs_safely(force, techs)
 force_util.research_techs_by_regex(force, regex)
@@ -74,8 +77,7 @@ end
 ---@param value any
 function force_util.change_techs_safely(force, techs, field_name, value)
 	local technologies = force.technologies
-	for i=1, #techs do
-		local tech_name = techs[i]
+	for _, tech_name in pairs(techs) do
 		local tech = technologies[tech_name]
 		if tech then
 			tech[field_name] = value
@@ -89,8 +91,7 @@ end
 ---@param value any
 function force_util.change_enabled_techs_safely(force, techs, field_name, value)
 	local technologies = force.technologies
-	for i=1, #techs do
-		local tech_name = techs[i]
+	for _, tech_name in pairs(techs) do
 		local tech = technologies[tech_name]
 		if tech and tech.enabled then
 			tech[field_name] = value
@@ -101,10 +102,73 @@ end
 
 ---@param force LuaForce
 ---@param techs string[]
+---@return boolean
+---@overload fun(force: LuaForce, techs: string[], is_return_rest_by_not_researched_techs: boolean): boolean, string[]
+function force_util.has_researched_all(force, techs, is_return_rest_by_not_researched_techs)
+	local technologies = force.technologies
+
+	if is_return_rest_by_not_researched_techs == nil then
+		for _, tech_name in pairs(techs) do
+			local tech = technologies[tech_name]
+			if not (tech and tech.enabled) then
+				return false
+			end
+		end
+
+		return true
+	end
+
+	if is_return_rest_by_not_researched_techs then
+		local has_researched_all = true
+		local not_researched_techs
+		for _, tech_name in pairs(techs) do
+			local tech = technologies[tech_name]
+			if not (tech and tech.enabled) then
+				not_researched_techs = not_researched_techs or {}
+				not_researched_techs[#not_researched_techs+1] = tech_name
+				has_researched_all = false
+			end
+		end
+
+		return has_researched_all, not_researched_techs
+	else
+		local has_researched_all = true
+		local researched_techs
+		for _, tech_name in pairs(techs) do
+			local tech = technologies[tech_name]
+			if not (tech and tech.enabled) then
+				researched_techs = researched_techs or {}
+				researched_techs[#researched_techs+1] = tech_name
+				has_researched_all = false
+			end
+		end
+
+		return has_researched_all, researched_techs
+	end
+end
+
+
+---@param force LuaForce
+---@param techs string[]
+---@return boolean
+function force_util.has_researched_any(force, techs)
+	local technologies = force.technologies
+	for _, tech_name in pairs(techs) do
+		local tech = technologies[tech_name]
+		if tech and tech.enabled then
+			return true
+		end
+	end
+
+	return false
+end
+
+
+---@param force LuaForce
+---@param techs string[]
 function force_util.research_techs_safely(force, techs)
 	local technologies = force.technologies
-	for i=1, #techs do
-		local tech_name = techs[i]
+	for _, tech_name in pairs(techs) do
 		local tech = technologies[tech_name]
 		if tech then
 			tech.researched = true
@@ -117,8 +181,7 @@ end
 ---@param techs string[]
 function force_util.research_enabled_techs_safely(force, techs)
 	local technologies = force.technologies
-	for i=1, #techs do
-		local tech_name = techs[i]
+	for _, tech_name in pairs(techs) do
 		local tech = technologies[tech_name]
 		if tech and tech.enabled then
 			tech.researched = true
@@ -225,7 +288,6 @@ function force_util.count_techs(force)
 
 	return researched_techs, total_techs, researched_techs / total_techs
 end
-
 
 
 ---@param forces table<any, LuaForce>
