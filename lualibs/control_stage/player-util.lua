@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 7}
+local player_util = {build = 8}
 
 
 --[[
@@ -16,8 +16,10 @@ player_util.delete_gui_for_players(players=game.players, source_gui_name, gui_na
 player_util.find_closest_player_to_position(players=game.connected_players, position): LuaPlayer?, uint?
 player_util.find_players_in_radius(players=game.connected_players, position, radius): LuaPlayer[]
 player_util.is_there_player_in_radius(players=game.connected_players, position, radius): boolean
-player_util.has_all_items(player, item_requests, is_return_missing_items=false): boolean, missing_items?
-TODO: player_util.get_all_items(player, item_requests, is_return_missing_items=false): ItemStack[], missing_items?
+player_util.has_all_items(player, item_requests): boolean
+player_util.has_all_items(player, item_requests, is_return_rest_by_missing_items): boolean, rest_items?
+TODO: player_util.get_all_items(player, item_requests): ItemStack[]
+TODO: player_util.get_all_items(player, item_requests, is_return_rest_by_missing_items): ItemStack[], rest_items?
 player_util.has_any_item(player, item_requests): boolean
 TODO: player_util.get_any_item(player, item_requests): item
 ]]
@@ -343,45 +345,117 @@ end
 
 
 ---@param player LuaPlayer
----@param item_requests table<string, uint>
----@param is_return_missing_items false|nil
+---@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
+---@param is_return_rest_by_missing_items nil
 ---@return boolean
----@overload fun(player: LuaPlayer,  item_requests: table<string, uint>, is_return_missing_items: true): boolean, table<string, uint>?
-function player_util.has_all_items(player, item_requests, is_return_missing_items)
+---@overload fun(player: LuaPlayer,  item_requests: table<string, uint> | SimpleItemStack[] | ItemStackDefinition[], is_return_missing_items: boolean): boolean, table<string, uint>?
+function player_util.has_all_items(player, item_requests, is_return_rest_by_missing_items)
 	local get_item_count = player.get_item_count
-	if not is_return_missing_items then
-		for item_name, need_count in pairs(item_requests) do
-			local current_count = get_item_count(item_name)
-			if current_count <= need_count then
+
+	if #item_requests <= 0 then
+		---@cast item_requests table<string, uint>
+		if is_return_rest_by_missing_items == nil then
+			for item_name, need_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count <= need_count then
+					return false
+				end
+			end
+
+			return true
+		elseif is_return_rest_by_missing_items == true then
+			local has_missing_items = false
+			local missing_items
+			for item_name, existing_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count <= existing_count then
+					missing_items = missing_items or {}
+					missing_items[item_name] = existing_count - current_count
+				end
+			end
+
+			return has_missing_items, missing_items
+		else
+			local has_found_items = false
+			local found_items
+			for item_name, existing_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count > existing_count then
+					found_items = found_items or {}
+					found_items[item_name] = existing_count - current_count
+				end
+			end
+
+			return has_found_items, found_items
+		end
+	end
+
+
+	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	if is_return_rest_by_missing_items == nil then
+		for _, item in pairs(item_requests) do
+			local current_count = get_item_count(item.name)
+			if current_count <= (item.count or 1) then
 				return false
 			end
 		end
 
 		return true
-	else
+	elseif is_return_rest_by_missing_items == true then
 		local has_missing_items = false
 		local missing_items
-		for item_name, need_count in pairs(item_requests) do
-			local current_count = get_item_count(item_name)
-			if current_count <= need_count then
+		for _, item in pairs(item_requests) do
+			local need_count = (item.count or 1)
+			local name = item.name
+			local existing_count = get_item_count(name)
+			if existing_count <= need_count then
 				missing_items = missing_items or {}
-				missing_items[item_name] = need_count - current_count
+				missing_items[name] = need_count - existing_count
 			end
 		end
 
 		return has_missing_items, missing_items
+	else
+		local has_found_items = false
+		local found_items
+		for _, item in pairs(item_requests) do
+			local need_count = (item.count or 1)
+			local name = item.name
+			local current_count = get_item_count(name)
+			if current_count > need_count then
+				found_items = found_items or {}
+				found_items[name] = need_count - current_count
+			end
+		end
+
+		return has_found_items, found_items
 	end
 end
 
 
 ---@param player LuaPlayer
----@param item_requests table<string, uint>
+---@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
 ---@return boolean
 function player_util.has_any_item(player, item_requests)
 	local get_item_count = player.get_item_count
-	for item_name, need_count in pairs(item_requests) do
-		local current_count = get_item_count(item_name)
-		if current_count >= need_count then
+
+
+	if #item_requests <= 0 then
+		---@cast item_requests table<string, uint>
+		for item_name, need_count in pairs(item_requests) do
+			local current_count = get_item_count(item_name)
+			if current_count >= need_count then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	for _, item in pairs(item_requests) do
+		local current_count = get_item_count(item.name)
+		if current_count >= (item.count or 1) then
 			return true
 		end
 	end
