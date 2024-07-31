@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 8}
+local player_util = {build = 9}
 
 
 --[[
@@ -346,7 +346,7 @@ end
 
 ---@param player LuaPlayer
 ---@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
----@param is_return_rest_by_missing_items nil
+---@param is_return_rest_by_missing_items nil # false then return items that found
 ---@return boolean
 ---@overload fun(player: LuaPlayer,  item_requests: table<string, uint> | SimpleItemStack[] | ItemStackDefinition[], is_return_missing_items: boolean): boolean, table<string, uint>?
 function player_util.has_all_items(player, item_requests, is_return_rest_by_missing_items)
@@ -363,7 +363,7 @@ function player_util.has_all_items(player, item_requests, is_return_rest_by_miss
 			end
 
 			return true
-		elseif is_return_rest_by_missing_items == true then
+		elseif is_return_rest_by_missing_items then
 			local has_missing_items = false
 			local missing_items
 			for item_name, existing_count in pairs(item_requests) do
@@ -401,7 +401,7 @@ function player_util.has_all_items(player, item_requests, is_return_rest_by_miss
 		end
 
 		return true
-	elseif is_return_rest_by_missing_items == true then
+	elseif is_return_rest_by_missing_items then
 		local has_missing_items = false
 		local missing_items
 		for _, item in pairs(item_requests) do
