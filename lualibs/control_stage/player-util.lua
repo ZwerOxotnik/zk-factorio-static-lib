@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 9}
+local player_util = {build = 10}
 
 
 --[[
@@ -382,7 +382,7 @@ function player_util.has_all_items(player, item_requests, is_return_rest_by_miss
 				local current_count = get_item_count(item_name)
 				if current_count > existing_count then
 					found_items = found_items or {}
-					found_items[item_name] = existing_count - current_count
+					found_items[item_name] = current_count
 				end
 			end
 
@@ -424,7 +424,7 @@ function player_util.has_all_items(player, item_requests, is_return_rest_by_miss
 			local current_count = get_item_count(name)
 			if current_count > need_count then
 				found_items = found_items or {}
-				found_items[name] = need_count - current_count
+				found_items[name] = current_count
 			end
 		end
 
