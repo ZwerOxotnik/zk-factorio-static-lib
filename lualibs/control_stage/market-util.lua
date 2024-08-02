@@ -41,11 +41,9 @@ function market_util.add_offers_safely(target, offers)
 	local item_prototypes = game.item_prototypes
 	local add_market_item = target.add_market_item
 	local added_amount = 0
-	for i = 1, #offers do
-		local offer_data = offers[i]
+	for _, offer_data in pairs(offers) do
 		local prices = offer_data.price
-		for j=1, #prices do
-			local price_data = prices[j]
+		for _, price_data in pairs(prices) do
 			if item_prototypes[price_data[1] or price_data.name] == nil then
 				goto skip
 			end
@@ -95,8 +93,7 @@ end
 ---@param offers Offer[]
 function market_util.add_offers(target, offers)
 	local add_market_item = target.add_market_item
-	for i = 1, #offers do
-		local offer_data = offers[i]
+	for _, offer_data in pairs(offers) do
 		add_market_item(offer_data)
 	end
 end

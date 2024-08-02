@@ -19,8 +19,8 @@ TODO: inventory_util.get_any_item(reciever, item_requests): item
 ]]
 
 
----@param source_inventory LuaInventory
----@param reciever_inventory LuaInventory
+---@param source_inventory LuaInventory | LuaControl | LuaTransportLine
+---@param reciever_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
 ---@return boolean
 function inventory_util.copy_inventory_items_safely(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
@@ -30,23 +30,23 @@ function inventory_util.copy_inventory_items_safely(source_inventory, reciever_i
 		return false
 	end
 
-	for i = 1, #source_inventory do
-		---@type LuaItemStack
-		local stack = source_inventory[i]
-		if not stack.valid_for_read then
-			goto continue
+
+
+	local can_insert = source_inventory.can_insert
+	local insert = reciever_inventory.insert
+	for _, stack in pairs(source_inventory) do
+		---@cast stack LuaItemStack # TODO: recheck
+		if stack.valid_for_read and can_insert(stack) then
+			insert(stack)
 		end
-		if source_inventory.can_insert(stack) then
-			reciever_inventory.insert(stack)
-		end
-		:: continue ::
 	end
+
 	return true
 end
 
 
----@param source_inventory LuaInventory
----@param reciever_inventory LuaInventory
+---@param source_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
+---@param reciever_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
 ---@return boolean
 function inventory_util.copy_inventory_items(source_inventory, reciever_inventory)
 	if not (source_inventory and source_inventory.valid) then
@@ -56,42 +56,45 @@ function inventory_util.copy_inventory_items(source_inventory, reciever_inventor
 		return false
 	end
 
-	for i = 1, #source_inventory do
-		---@type LuaItemStack
-		local stack = source_inventory[i]
+	local insert = reciever_inventory.insert
+	for _, stack in pairs(source_inventory) do
+		---@cast stack LuaItemStack
 		if stack.valid_for_read then
-			reciever_inventory.insert(stack)
+			insert(stack)
 		end
 	end
+
 	return true
 end
 
 
----@param source_inventory LuaInventory
----@param player LuaPlayer
+---@param source_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
+---@param entity LuaControl
 ---@return boolean
-function inventory_util.copy_inventory_items_to_player(source_inventory, player)
+function inventory_util.copy_inventory_items_to_player(source_inventory, entity)
 	if not (source_inventory and source_inventory.valid) then
 		return false
 	end
-	if not (player and player.valid) then
+	if not (entity and entity.valid) then
 		return false
 	end
-	local player_inv = player.get_main_inventory()
-	if not (player_inv and player_inv.valid) then
+	local entity_inv = entity.get_main_inventory()
+	if not (entity_inv and entity_inv.valid) then
 		return false
 	end
 
-	local spill_item_stack = player.surface.spill_item_stack
-	local player_position = player.position
+	local insert = entity_inv.insert
+	local can_insert = entity_inv.can_insert
+	local spill_item_stack = entity.surface.spill_item_stack
+	local player_position = entity.position
 	for _, stack in pairs(source_inventory) do --TODO: recheck
 		---@cast stack LuaItemStack
 		if not stack.valid_for_read then
 			goto continue
 		end
 
-		if player_inv.can_insert(stack) then
-			player_inv.insert(stack)
+		if can_insert(stack) then
+			insert(stack)
 		else
 			spill_item_stack(player_position, stack, true, nil, false) -- lootable, can't be spilled onto belts
 		end

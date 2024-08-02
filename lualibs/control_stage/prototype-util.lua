@@ -105,14 +105,15 @@ end
 function prototype_util.get_recipes_successors(recipe, depth)
 	depth = depth or 1
 
+	local get_recipes_by_ingredient = prototype_util.get_recipes_by_ingredient
 	local result_recipes = {nil}
 	local products = recipe.products
-	for i = 1, #products do
-		recipes = prototype_util.get_recipes_by_ingredient(products[i])
+	for _, product in pairs(products) do
+		recipes = get_recipes_by_ingredient(product)
 		for _, _recipe in pairs(recipes) do
 			if _recipe ~= recipe then
-				for j = 1, #result_recipes do
-					if _recipe == result_recipes[j] then
+				for _, result_recipe in pairs(result_recipes) do
+					if _recipe == result_recipe then
 						goto continuei2
 					end
 				end
@@ -152,14 +153,15 @@ end
 function prototype_util.get_recipes_predecessors(recipe, depth)
 	depth = depth or 1
 
+	local get_recipes_by_product = prototype_util.get_recipes_by_product
 	local result_recipes = {nil}
 	local ingredients = recipe.ingredients
-	for i = 1, #ingredients do
-		recipes = prototype_util.get_recipes_by_product(ingredients[i])
+	for _, ingredient in pairs(ingredients) do
+		recipes = get_recipes_by_product(ingredient)
 		for _, _recipe in pairs(recipes) do
 			if _recipe ~= recipe then
-				for j = 1, #result_recipes do
-					if _recipe == result_recipes[j] then
+				for _, result_recipe in pairs(result_recipes) do
+					if _recipe == result_recipe then
 						goto continuei2
 					end
 				end
