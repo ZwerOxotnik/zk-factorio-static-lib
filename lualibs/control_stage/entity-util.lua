@@ -1,5 +1,5 @@
 ---@class ZOentity_util
-local entity_util = {build = 9}
+local entity_util = {build = 10}
 
 
 --[[
@@ -12,12 +12,19 @@ entity_util.disconnect_not_friendly_wires(entity, wire_type_name)
 entity_util.find_entities(filter_param, surfaces=game.surfaces, surface_blacklist?): table<uint, LuaEntity[]>
 entity_util.count_entities(filter_param, surfaces=game.surfaces, surface_blacklist?): integer
 entity_util.destroy_entities(filter_param, surfaces=game.surfaces, surface_blacklist?)
+entity_util.has_all_items(entity, item_requests): boolean
+entity_util.has_all_items(entity, item_requests, is_return_rest_by_missing_items): boolean, rest_items?
+TODO: entity_util.get_all_items(entity, item_requests): ItemStack[]
+TODO: entity_util.get_all_items(entity, item_requests, is_return_rest_by_missing_items): ItemStack[], rest_items?
+entity_util.has_any_item(entity, item_requests): boolean
+TODO: entity_util.get_any_item(entity, item_requests): item
 ]]
 
 
 ---@type LuaEntity.destroy_param
 local DESTROY_PARAM = {raise_destroy = true}
 local random = math.random
+local pairs = pairs
 
 
 -- the items must have .count or .amount
@@ -230,6 +237,126 @@ function entity_util.destroy_entities(filter_param, surfaces, surface_blacklist)
 	end
 
 	return group_entities
+end
+
+
+---@param entity LuaEntity
+---@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
+---@param is_return_rest_by_missing_items nil # false then return items that found
+---@return boolean
+---@overload fun(player: LuaEntity, item_requests: table<string, uint> | SimpleItemStack[] | ItemStackDefinition[], is_return_missing_items: boolean): boolean, table<string, uint>?
+function entity_util.has_all_items(entity, item_requests, is_return_rest_by_missing_items)
+	local get_item_count = entity.get_item_count
+
+	if #item_requests <= 0 then
+		---@cast item_requests table<string, uint>
+		if is_return_rest_by_missing_items == nil then
+			for item_name, need_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count <= need_count then
+					return false
+				end
+			end
+
+			return true
+		elseif is_return_rest_by_missing_items then
+			local has_missing_items = false
+			local missing_items
+			for item_name, existing_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count <= existing_count then
+					missing_items = missing_items or {}
+					missing_items[item_name] = existing_count - current_count
+				end
+			end
+
+			return has_missing_items, missing_items
+		else
+			local has_found_items = false
+			local found_items
+			for item_name, existing_count in pairs(item_requests) do
+				local current_count = get_item_count(item_name)
+				if current_count > existing_count then
+					found_items = found_items or {}
+					found_items[item_name] = current_count
+				end
+			end
+
+			return has_found_items, found_items
+		end
+	end
+
+
+	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	if is_return_rest_by_missing_items == nil then
+		for _, item in pairs(item_requests) do
+			local current_count = get_item_count(item.name)
+			if current_count <= (item.count or 1) then
+				return false
+			end
+		end
+
+		return true
+	elseif is_return_rest_by_missing_items then
+		local has_missing_items = false
+		local missing_items
+		for _, item in pairs(item_requests) do
+			local need_count = (item.count or 1)
+			local name = item.name
+			local existing_count = get_item_count(name)
+			if existing_count <= need_count then
+				missing_items = missing_items or {}
+				missing_items[name] = need_count - existing_count
+			end
+		end
+
+		return has_missing_items, missing_items
+	else
+		local has_found_items = false
+		local found_items
+		for _, item in pairs(item_requests) do
+			local need_count = (item.count or 1)
+			local name = item.name
+			local current_count = get_item_count(name)
+			if current_count > need_count then
+				found_items = found_items or {}
+				found_items[name] = current_count
+			end
+		end
+
+		return has_found_items, found_items
+	end
+end
+
+
+---@param entity LuaEntity
+---@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
+---@return boolean
+function entity_util.has_any_item(entity, item_requests)
+	local get_item_count = entity.get_item_count
+
+
+	if #item_requests <= 0 then
+		---@cast item_requests table<string, uint>
+		for item_name, need_count in pairs(item_requests) do
+			local current_count = get_item_count(item_name)
+			if current_count >= need_count then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	for _, item in pairs(item_requests) do
+		local current_count = get_item_count(item.name)
+		if current_count >= (item.count or 1) then
+			return true
+		end
+	end
+
+	return false
 end
 
 
