@@ -1,5 +1,5 @@
 ---@class ZOentity_util
-local entity_util = {build = 10}
+local entity_util = {build = 11}
 
 
 --[[
@@ -18,13 +18,15 @@ TODO: entity_util.get_all_items(entity, item_requests): ItemStack[]
 TODO: entity_util.get_all_items(entity, item_requests, is_return_rest_by_missing_items): ItemStack[], rest_items?
 entity_util.has_any_item(entity, item_requests): boolean
 TODO: entity_util.get_any_item(entity, item_requests): item
+entity_util.add_items(entity, items)
+entity_util.add_items(entity, items, is_return_rest_by_missing_items): table<string, uint>?
 ]]
 
 
 ---@type LuaEntity.destroy_param
 local DESTROY_PARAM = {raise_destroy = true}
 local random = math.random
-local pairs = pairs
+local pairs, next = pairs, next
 
 
 -- the items must have .count or .amount
@@ -238,10 +240,10 @@ end
 
 
 ---@param entity LuaEntity
----@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
+---@param item_requests table<string, uint> | SimpleItemStack[] | LuaItemStack[]
 ---@param is_return_rest_by_missing_items nil # false then return items that found
 ---@return boolean
----@overload fun(player: LuaEntity, item_requests: table<string, uint> | SimpleItemStack[] | ItemStackDefinition[], is_return_missing_items: boolean): boolean, table<string, uint>?
+---@overload fun(player: LuaEntity, item_requests: table<string, uint> | SimpleItemStack[] | LuaItemStack[], is_return_missing_items: boolean): boolean, table<string, uint>?
 function entity_util.has_all_items(entity, item_requests, is_return_rest_by_missing_items)
 	local get_item_count = entity.get_item_count
 
@@ -284,7 +286,7 @@ function entity_util.has_all_items(entity, item_requests, is_return_rest_by_miss
 	end
 
 
-	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	---@cast item_requests SimpleItemStack[] | LuaItemStack[]
 	if is_return_rest_by_missing_items == nil then
 		for _, item in pairs(item_requests) do
 			local current_count = get_item_count(item.name)
@@ -327,7 +329,7 @@ end
 
 
 ---@param entity LuaEntity
----@param item_requests table<string, uint> | SimpleItemStack[] | ItemStackDefinition[]
+---@param item_requests table<string, uint> | SimpleItemStack[] | LuaItemStack[]
 ---@return boolean
 function entity_util.has_any_item(entity, item_requests)
 	local get_item_count = entity.get_item_count
@@ -345,7 +347,7 @@ function entity_util.has_any_item(entity, item_requests)
 		return false
 	end
 
-	---@cast item_requests SimpleItemStack[] | ItemStackDefinition[]
+	---@cast item_requests SimpleItemStack[] | LuaItemStack[]
 	for _, item in pairs(item_requests) do
 		local current_count = get_item_count(item.name)
 		if current_count >= (item.count or 1) then
@@ -354,6 +356,131 @@ function entity_util.has_any_item(entity, item_requests)
 	end
 
 	return false
+end
+
+
+---@param entity LuaEntity
+---@param items table<string, uint> | SimpleItemStack[] | LuaItemStack[]
+---@param is_return_rest_by_missing_items boolean
+---@return table<string, uint>
+---@overload fun(entity: LuaEntity, items: table<string, uint> | SimpleItemStack[] | LuaItemStack[])
+function entity_util.add_items(entity, items, is_return_rest_by_missing_items)
+	local _, v = next(items)
+	local is_items_dictionary = (type(v) == "number")
+	local is_items_SimpleItemStack = (type(v) == "table")
+
+	local insert = entity.insert
+	if is_items_dictionary then
+		---@cast items table<string, uint>
+
+		if is_return_rest_by_missing_items == nil then
+			---@type SimpleItemStack
+			local simple_item_stack = {name = "", count = 1}
+			for name, count in pairs(items) do
+				simple_item_stack.name = name
+				simple_item_stack.count = count
+				insert(simple_item_stack)
+			end
+
+			return
+		end
+
+		if is_return_rest_by_missing_items then
+			local not_added_items
+			---@type SimpleItemStack
+			local simple_item_stack = {name = "", count = 1}
+			for name, count in pairs(items) do
+				simple_item_stack.name = name
+				simple_item_stack.count = count
+				local rest_count = count - insert(simple_item_stack)
+				if rest_count > 0 then
+					not_added_items[name] = rest_count
+				end
+			end
+
+			return not_added_items
+		else
+			local added_items
+			---@type SimpleItemStack
+			local simple_item_stack = {name = "", count = 1}
+			for name, count in pairs(items) do
+				simple_item_stack.name = name
+				simple_item_stack.count = count
+				local added_count = insert(simple_item_stack)
+				if added_count > 0 then
+					added_items[name] = added_count
+				end
+			end
+
+			return added_items
+		end
+	end
+
+	if is_items_SimpleItemStack then
+		---@cast items SimpleItemStack[]
+
+		if is_return_rest_by_missing_items == nil then
+			for _, item in pairs(items) do
+				insert(item)
+			end
+			return
+		end
+
+		if is_return_rest_by_missing_items then
+			local not_added_items
+			for _, item in pairs(items) do
+				local rest_count = item.count - insert(item)
+				if rest_count > 0 then
+					not_added_items[item.name] = rest_count
+				end
+			end
+
+			return not_added_items
+		else
+			local added_items
+			for _, item in pairs(items) do
+				local added_count = insert(item)
+				if added_count > 0 then
+					added_items[item.name] = added_count
+				end
+			end
+
+			return added_items
+		end
+	end
+
+	---@cast items LuaItemStack[]
+
+	if is_return_rest_by_missing_items == nil then
+		for _, item in pairs(items) do
+			insert(item)
+		end
+		return
+	end
+
+	if is_return_rest_by_missing_items then
+		local not_added_items
+		for _, item in pairs(items) do
+			local rest_count = item.count - insert(item)
+			if rest_count > 0 then
+				local name = item.name
+				not_added_items[name] = (not_added_items[name] or 0) + rest_count
+			end
+		end
+
+		return not_added_items
+	else
+		local added_items
+		for _, item in pairs(items) do
+			local added_count = insert(item)
+			if added_count > 0 then
+				local name = item.name
+				added_items[name] = (added_items[name] or 0) + added_count
+			end
+		end
+
+		return added_items
+	end
 end
 
 
