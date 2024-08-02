@@ -93,8 +93,7 @@ end
 function entity_util.disconnect_wires_by_force(entity, target_force, wire_type_name)
 	local neighbours = entity.neighbours[(wire_type_name or "copper")]
 	local disconnect_neighbour = entity.disconnect_neighbour
-	for i=1, #neighbours do
-		local neighbour = neighbours[i]
+	for _, neighbour in pairs(neighbours) do
 		if neighbour.force == target_force then
 			disconnect_neighbour(neighbour)
 		end
@@ -108,8 +107,7 @@ function entity_util.disconnect_not_own_wires(entity, wire_type_name)
 	local entity_force = entity.force
 	local neighbours = entity.neighbours[(wire_type_name or "copper")]
 	local disconnect_neighbour = entity.disconnect_neighbour
-	for i=1, #neighbours do
-		local neighbour = neighbours[i]
+	for _, neighbour in pairs(neighbours) do
 		if entity_force ~= neighbour.force then
 			disconnect_neighbour(neighbour)
 		end
@@ -124,8 +122,7 @@ function entity_util.disconnect_not_friendly_wires(entity, wire_type_name)
 	local neighbours = entity.neighbours[(wire_type_name or "copper")]
 	local disconnect_neighbour = entity.disconnect_neighbour
 	local friendly_relations = {}
-	for i=1, #neighbours do
-		local neighbour = neighbours[i]
+	for _, neighbour in pairs(neighbours) do
 		local neighbour_force = neighbour.force
 		if entity_force ~= neighbour_force then
 			local is_friendly = friendly_relations[neighbour_force]
@@ -219,8 +216,8 @@ function entity_util.destroy_entities(filter_param, surfaces, surface_blacklist)
 		for _, surface in pairs(surfaces) do
 			if not surface.valid then goto continue end
 			local entities = surface.find_entities_filtered(filter_param)
-			for i = #entities, 1, -1 do
-				entities[i].destroy(DESTROY_PARAM)
+			for _, entity in pairs(entities) do
+				entity.destroy(DESTROY_PARAM)
 			end
 			::continue::
 		end
@@ -229,8 +226,8 @@ function entity_util.destroy_entities(filter_param, surfaces, surface_blacklist)
 			if not surface.valid then goto continue end
 			if surface_blacklist[surface.index] then goto continue end
 			local entities = surface.find_entities_filtered(filter_param)
-			for i = #entities, 1, -1 do
-				entities[i].destroy(DESTROY_PARAM)
+			for _, entity in pairs(entities) do
+				entity.destroy(DESTROY_PARAM)
 			end
 			::continue::
 		end
