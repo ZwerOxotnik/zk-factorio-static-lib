@@ -24,7 +24,7 @@ function biter_util.use_default_evolution()
 end
 
 
-
+---@param evolution_factor double
 function biter_util.set_default_evolution(evolution_factor)
 	-- For https://mods.factorio.com/mod/EasyAPI
 	if settings.global["EAPI_start-evolution"] then
