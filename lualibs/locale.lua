@@ -123,8 +123,8 @@ function locale_util.merge_locales(...)
 					if new_array == data or #new_array == 0 then
 						new_locale[#new_locale+1] = data
 					else
-						for i=1, #new_array do
-							new_locale[#new_locale+1] = new_array[i]
+						for _, _v in pairs(new_array) do
+							new_locale[#new_locale+1] = _v
 						end
 					end
 				elseif _type == "string" then

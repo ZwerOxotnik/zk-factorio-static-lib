@@ -32,9 +32,8 @@ function player_util.get_new_resource_position_by_player_resource(player, resour
 	end
 
 	local settings = {position = player.position, radius = resource_reach_distance, name = resource.name, limit = 2}
-	local resources = player.surface.find_entities_filtered(settings)
-	for i=1, #resources do
-		local new_resource = resources[i]
+	local new_resources = player.surface.find_entities_filtered(settings)
+	for _, new_resource in pairs(new_resources) do
 		if resource ~= new_resource then
 			return new_resource.position
 		end

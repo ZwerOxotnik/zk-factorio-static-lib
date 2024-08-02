@@ -224,8 +224,7 @@ function force_util.research_techs_by_items(force, items, max_research_unit_coun
 			local is_valid = false
 			local ingredient_name = ingredient.name
 			local unit_count = tech.research_unit_count
-			for i=1, #items do
-				local item_name = items[i]
+			for _, item_name in pairs(items) do
 				if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
 					is_valid = true
 					break
@@ -254,8 +253,7 @@ function force_util.research_enabled_techs_by_items(force, items, max_research_u
 				local is_valid = false
 				local ingredient_name = ingredient.name
 				local unit_count = tech.research_unit_count
-				for i=1, #items do
-					local item_name = items[i]
+				for _, item_name in pairs(items) do
 					if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
 						is_valid = true
 						break

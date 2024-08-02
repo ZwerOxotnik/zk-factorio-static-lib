@@ -60,8 +60,7 @@ GuiTemplater.events = {
 		if not (player and player.valid) then return end
 
 		local templates_for_new_players = GuiTemplater.templates_for_new_players
-		for i = 1, #templates_for_new_players do
-			local template = templates_for_new_players[i]
+		for _, template in pairs(templates_for_new_players) do
 			local gui = player.gui[template.create_for_new_players]
 			template.createGUIs(gui)
 		end
@@ -72,8 +71,7 @@ GuiTemplater.events = {
 		if not (player and player.valid) then return end
 
 		local templates_for_joined_players = GuiTemplater.templates_for_joined_players
-		for i = 1, #templates_for_joined_players do
-			local template = templates_for_joined_players[i]
+		for _, template in pairs(templates_for_joined_players) do
 			local gui = player.gui[template.create_for_joined_players]
 			template.createGUIs(gui)
 		end
@@ -84,8 +82,7 @@ GuiTemplater.events = {
 		if not (player and player.valid) then return end
 
 		local templates_for_left_players = GuiTemplater.templates_for_left_players
-		for i = 1, #templates_for_left_players do
-			local template = templates_for_left_players[i]
+		for _, template in pairs(templates_for_left_players) do
 			local gui = player.gui[template.destroy_for_left_players]
 			template.destroyGUIs(gui)
 		end
@@ -839,8 +836,8 @@ local function _checkEvents(template_data)
 
 	local children = template_data.children
 	if not children then return end
-	for i=1, #children do
-		_checkEvents(children[i])
+	for _, child in pairs(children) do
+		_checkEvents(child)
 	end
 end
 
@@ -853,8 +850,8 @@ local function _checkExpanderEvents(template_data)
 
 	local children = template_data.children
 	if not children then return end
-	for i=1, #children do
-		_checkExpanderEvents(children[i])
+	for _, child in pairs(children) do
+		_checkExpanderEvents(child)
 	end
 end
 
@@ -913,8 +910,8 @@ function GuiTemplater.create(init_data)
 
 		local children = template_data.children
 		if children then
-			for i=1, #children do
-				is_ok, result = template.createGUIs(newGui, children[i], player)
+			for _, child in pairs(children) do
+				is_ok, result = template.createGUIs(newGui, child, player)
 				if not is_ok then
 					GuiTemplater._log(result, player)
 					return false
@@ -1007,8 +1004,8 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 		end
 
 		local children = parent.children
-		for i=1, #children do
-			if children[i] == check_element then
+		for i, child in pairs(children) do
+			if child == check_element then
 				index = i
 			end
 		end
@@ -1135,8 +1132,8 @@ function GuiTemplater.create_expander_template(init_data, expander_name, caption
 
 		local children = template_data.children
 		if children then
-			for i=1, #children do
-				is_ok, result = template.createGUIs(newGui, children[i], player)
+			for _, child in pairs(children) do
+				is_ok, result = template.createGUIs(newGui, child, player)
 				if not is_ok then
 					GuiTemplater._log(result, player)
 					return false

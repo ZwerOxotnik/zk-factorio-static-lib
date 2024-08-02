@@ -76,9 +76,8 @@ function inventory_util.copy_inventory_items_to_player(source_inventory, player)
 
 	local spill_item_stack = player.surface.spill_item_stack
 	local player_position = player.position
-	for i=1, #source_inventory do
-		---@type LuaItemStack
-		local stack = source_inventory[i]
+	for _, stack in pairs(source_inventory) do --TODO: recheck
+		---@cast stack LuaItemStack
 		if not stack.valid_for_read then
 			goto continue
 		end
@@ -98,8 +97,7 @@ end
 ---@param items table[]
 function inventory_util.insert_items_safely(reciever, items)
 	local item_prototypes = game.item_prototypes
-	for i=1, #items do
-		local item_data = items[i]
+	for _, item_data in pairs(items) do
 		if item_prototypes[item_data.name] then
 			reciever.insert(item_data)
 		end
@@ -111,8 +109,7 @@ end
 ---@param items table[]
 function inventory_util.remove_items_safely(reciever, items)
 	local item_prototypes = game.item_prototypes
-	for i=1, #items do
-		local item_data = items[i]
+	for _, item_data in pairs(items) do
 		if item_prototypes[item_data.name] then
 			reciever.remove(item_data)
 		end

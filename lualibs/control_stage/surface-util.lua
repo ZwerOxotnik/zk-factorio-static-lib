@@ -1,5 +1,5 @@
 ---@class ZOsurface_util
-local surface_util = {build = 1}
+local surface_util = {build = 2}
 
 
 --[[
@@ -345,8 +345,7 @@ function surface_util.flip_tiles_vertically_and_horizontally(surface, find_param
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-	for i=1, #tiles do
-		local tile = tiles[i]
+	for _, tile in pairs(tiles) do
 		local position = tile.position
 		local x = position.x
 		local x_to_left_top = abs(left_top_x - x)
@@ -379,6 +378,7 @@ function surface_util.flip_entities_vertically_and_horizontally(surface, find_pa
 	local left_top_x = find_param.area.left_top.x
 	local left_top_y = find_param.area.left_top.y
 	local right_bottom_x = find_param.area.right_bottom.x
+	local right_bottom_y = find_param.area.right_bottom.y
 	if destination_left_top and find_param.area and destination_surface == nil then
 		x_diff = abs((destination_left_top.x or destination_left_top[1]) - left_top_x) + 1
 		y_diff = abs((destination_left_top.y or destination_left_top[2]) - left_top_y) - 1
@@ -387,8 +387,7 @@ function surface_util.flip_entities_vertically_and_horizontally(surface, find_pa
 	local entities = surface.find_entities_filtered(find_param)
 	local new_position = {0,0}
 	local clone_data = {position = new_position}
-	for i=1, #entities do
-		local entity = entities[i]
+	for _, entity in pairs(entities) do
 		local position = entity.position
 		local x = position.x
 		local x_to_left_top = abs(left_top_x - x)
@@ -424,8 +423,7 @@ function surface_util.flip_entities_horizontally(surface, find_param, destinatio
 	local entities = surface.find_entities_filtered(find_param)
 	local new_position = {0,0}
 	local clone_data = {position = new_position}
-	for i=1, #entities do
-		local entity = entities[i]
+	for _, entity in pairs(entities) do
 		local position = entity.position
 		local x = position.x
 		local x_to_left_top = abs(left_top_x - x)
@@ -458,8 +456,7 @@ function surface_util.flip_tiles_horizontally(surface, find_param, destination_l
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-	for i=1, #tiles do
-		local tile = tiles[i]
+	for _, tile in pairs(tiles) do
 		local position = tile.position
 		local x = position.x
 		local x_to_left_top = abs(left_top_x - x)
@@ -497,8 +494,7 @@ function surface_util.flip_tiles_vertically(surface, find_param, destination_lef
 	local tiles = surface.find_tiles_filtered(find_param)
 	local c = 0
 	local tiles_data = {}
-	for i=1, #tiles do
-		local tile = tiles[i]
+	for _, tile in pairs(tiles) do
 		local position = tile.position
 		local x = position.x - x_diff
 		local y = position.y
@@ -536,8 +532,7 @@ function surface_util.flip_entities_vertically(surface, find_param, destination_
 	local entities = surface.find_entities_filtered(find_param)
 	local new_position = {0,0}
 	local clone_data = {position = new_position}
-	for i=1, #entities do
-		local entity = entities[i]
+	for _, entity in pairs(entities) do
 		local position = entity.position
 		local x = position.x - x_diff
 		local y = position.y
