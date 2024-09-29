@@ -1,10 +1,11 @@
 ---@class ZOsurface_util
-local surface_util = {build = 2}
+local surface_util = {build = 3}
 
 
 --[[
 surface_util.fill_horizontal_line_with_tiles(surface, x, y, size, tile_name)
 surface_util.fill_box_with_tiles(surface, x, y, size, tile_name)
+surface_util.fill_chunk_with_tiles(surface, x, y, tile_name)
 surface_util.fill_box_with_resources(surface, x, y, size, resource_name, amount, clone_area_param?)
 surface_util.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
 surface_util.flip_tiles_vertically_and_horizontally(surface, find_param, destination_left_top?, destination_surface?)
@@ -164,6 +165,17 @@ function surface_util.fill_box_with_tiles(surface, x, y, size, tile_name)
 	end
 
 	surface.set_tiles(tiles, true, false, false)
+end
+
+
+-- Creates tiles in a chunk
+-- This function clones area
+---@param surface LuaSurface
+---@param x integer
+---@param y integer
+---@param tile_name string
+function surface_util.fill_chunk_with_tiles(surface, x, y, tile_name)
+	surface_util.fill_box_with_tiles(surface, x * 32, y * 32 + 32, 32, tile_name)
 end
 
 
