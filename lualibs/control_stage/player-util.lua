@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 12}
+local player_util = {build = 13}
 
 
 --[[
@@ -7,7 +7,6 @@ player_util.get_new_resource_position_by_player_resource(player, resource): MapP
 player_util.get_resource_position_for_player(player): MapPosition?
 player_util.teleport_safely(player, surface, target_position): boolean
 player_util.delete_character(player)
-player_util.create_new_character_safely(player, character_name?)
 player_util.create_new_character(player, character_name?)
 player_util.teleport_players(players=game.players, surface, position): boolean
 player_util.teleport_players_safely(players=game.players, surface, position): boolean
@@ -127,37 +126,18 @@ end
 
 
 ---@param player LuaPlayer
----@param character_name string?
-function player_util.create_new_character_safely(player, character_name)
-	local character = player.character
-	if character and character.valid then
-		character.destroy({raise_destroy=true})
-	end
-
-	player.ticks_to_respawn = nil
-	player.set_controller{type=defines.controllers.god}
-	player.create_character(character_name) -- TODO: recheck
-end
-
-
----@param player LuaPlayer
 ---@param character_name string? # "character" by default
 function player_util.create_new_character(player, character_name)
-	--TODO: improve
-	character_name = character_name or "character"
-
 	-- Delete old character
 	player_util.delete_character(player)
 
-	-- Create new character (perhaps, it should be improved)
-	character = player.surface.create_entity{
-		name=character_name, force = player.force, position = player.position
-	}
-	player.set_controller({
-		type = defines.controllers.character,
-		character = character
-	})
-	player.spectator = false
+	player.ticks_to_respawn = nil
+	player.set_controller{type=defines.controllers.god}
+	if character_name then
+		player.create_character(character_name) -- TODO: recheck
+	else
+		player.create_character()
+	end
 end
 
 
