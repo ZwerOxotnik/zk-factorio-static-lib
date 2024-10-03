@@ -19,7 +19,7 @@ TODO: inventory_util.get_any_item(reciever, item_requests): item
 ]]
 
 
----@param source_inventory LuaInventory | LuaControl | LuaTransportLine
+---@param source_inventory   LuaInventory | LuaControl | LuaTransportLine
 ---@param reciever_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
 ---@return boolean
 function inventory_util.copy_inventory_items_safely(source_inventory, reciever_inventory)
@@ -45,7 +45,7 @@ function inventory_util.copy_inventory_items_safely(source_inventory, reciever_i
 end
 
 
----@param source_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
+---@param source_inventory   LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
 ---@param reciever_inventory LuaInventory | LuaEntity | LuaControl | LuaTrain | LuaLogisticNetwork
 ---@return boolean
 function inventory_util.copy_inventory_items(source_inventory, reciever_inventory)

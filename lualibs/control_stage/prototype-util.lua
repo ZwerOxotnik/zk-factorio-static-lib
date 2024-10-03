@@ -16,7 +16,7 @@ prototype_util.get_recipes_and_its_successors_by_ingredient(Product|Ingredient|t
 prototype_util.get_recipes_and_its_predecessors_by_product( Product|Ingredient|table, depth=1): LuaRecipePrototype[]
 prototype_util.get_result_recipes_by_entity_name(entity_name): LuaCustomTable<string, LuaRecipePrototype>
 prototype_util.find_min_max_turret_range(prototypes?): uint, uint -- min, max
-prototype_util.find_biggest_chest(prototypes?): LuaEntityPrototype?, uint? -- prototype, inventory_size
+prototype_util.find_biggest_chest(prototypes?):  LuaEntityPrototype?, uint? -- prototype, inventory_size
 prototype_util.find_smallest_chest(prototypes?): LuaEntityPrototype?, uint? -- prototype, inventory_size
 ]]
 

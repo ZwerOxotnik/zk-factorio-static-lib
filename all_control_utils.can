@@ -13,7 +13,8 @@ do
 --#	"control_stage/inventory-util", "control_stage/surface-util",
 --# "control_stage/prototype-util", "control_stage/biter-util",
 --# "control_stage/rcon-util", "control_stage/remote-interface-util",
---# "control_stage/tech-util", "control_stage/item-util"
+--# "control_stage/tech-util", "control_stage/item-util",
+--# "control_stage/data-util",
 --#}
 --#for i, path in ipairs(util_paths) do
 --#	write(string.format("	util = require(\"lualibs/%s\")", path))
