@@ -1,5 +1,5 @@
 ---@class ZOplayer_util
-local player_util = {build = 11}
+local player_util = {build = 12}
 
 
 --[[
@@ -7,6 +7,7 @@ player_util.get_new_resource_position_by_player_resource(player, resource): MapP
 player_util.get_resource_position_for_player(player): MapPosition?
 player_util.teleport_safely(player, surface, target_position): boolean
 player_util.delete_character(player)
+player_util.create_new_character_safely(player, character_name?)
 player_util.create_new_character(player, character_name?)
 player_util.teleport_players(players=game.players, surface, position): boolean
 player_util.teleport_players_safely(players=game.players, surface, position): boolean
@@ -123,6 +124,21 @@ function player_util.delete_character(player)
 		character.destroy({raise_destroy=true})
 	end
 end
+
+
+---@param player LuaPlayer
+---@param character_name string?
+function player_util.create_new_character_safely(player, character_name)
+	local character = player.character
+	if character and character.valid then
+		character.destroy({raise_destroy=true})
+	end
+
+	player.ticks_to_respawn = nil
+	player.set_controller{type=defines.controllers.god}
+	player.create_character(character_name) -- TODO: recheck
+end
+
 
 ---@param player LuaPlayer
 ---@param character_name string? # "character" by default
