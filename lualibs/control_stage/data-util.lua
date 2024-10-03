@@ -1,5 +1,5 @@
 ---@class ZOdata_util
-local data_util = {build = 1}
+local data_util = {build = 2}
 
 
 --[[
@@ -16,7 +16,7 @@ local tremove = table.remove
 ---@param target table<any, string> | table<string, any>
 function data_util.remove_invalid_prototypes(valid_prototypes, target)
 	local k1, v1
-	for k, v in pairs(valid_prototypes) do
+	for k, v in pairs(target) do
 		k1, v1 = k, v
 		break
 	end
@@ -53,7 +53,7 @@ function data_util.get_invalid_prototypes(valid_prototypes, target)
 	local invalid_prototypes = {}
 
 	local k1, v1
-	for k, v in pairs(valid_prototypes) do
+	for k, v in pairs(target) do
 		k1, v1 = k, v
 		break
 	end
@@ -84,7 +84,7 @@ function data_util.get_valid_prototypes(all_valid_prototypes, target)
 	local valid_prototypes = {}
 
 	local k1, v1
-	for k, v in pairs(all_valid_prototypes) do
+	for k, v in pairs(target) do
 		k1, v1 = k, v
 		break
 	end
