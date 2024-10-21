@@ -2,7 +2,7 @@
 -- And also requires a few more tests
 
 ---@class ZOrandom_items
-local random_items = {build = 1}
+local random_items = {build = 2}
 
 
 --[[
@@ -18,16 +18,16 @@ local random = math.random
 
 
 local function link_data()
-	random_items_list = global.random_items
+	random_items_list = storage.random_items
 end
 
 local function check_global_data()
-	global.random_items = global.random_items or {}
+	storage.random_items = storage.random_items or {}
 	link_data()
 end
 
 
--- Finds most player items and save their names into global.random_items
+-- Finds most player items and save their names into storage.random_items
 local function check_items()
 	local BLACKLISTED_NAMES = {
 		["artillery-targeting-remote"] = true
@@ -47,7 +47,7 @@ local function check_items()
 		["item-with-tags"] = true,
 		["tool"] = true -- it seems almost fine in general
 	}
-	global.random_items = {}
+	storage.random_items = {}
 	link_data()
 	for name, item in pairs(game.item_prototypes) do
 		if not (

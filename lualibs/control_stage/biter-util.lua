@@ -1,26 +1,27 @@
 ---@class ZObiter_util
-local biter_util = {build = 2}
+local biter_util = {build = 3}
 
 
 --[[
-biter_util.use_default_evolution()
+biter_util.use_default_evolution(surface=1)
 biter_util.set_default_evolution(evolution_factor)
 ]]
 
 
-function biter_util.use_default_evolution()
+---@param surface LuaSurface | uint
+function biter_util.use_default_evolution(surface)
 	local enemy = game.forces.enemy
 	if settings.global["EAPI_start-evolution"] then
-		enemy.evolution_factor = settings.global["EAPI_start-evolution"].value / 100
+		enemy.set_evolution_factor(settings.global["EAPI_start-evolution"].value / 100, surface)
 		return
 	end
 
-	if global.zo_default_settings then
-		enemy.evolution_factor = global.zo_default_settings.default_evolution_factor or 0
+	if storage.zo_default_settings then
+		enemy.set_evolution_factor((storage.zo_default_settings.default_evolution_factor or 0), surface)
 		return
 	end
 
-	enemy.evolution_factor = 0
+	enemy.set_evolution_factor(0, surface)
 end
 
 
@@ -32,15 +33,15 @@ function biter_util.set_default_evolution(evolution_factor)
 			value = evolution_factor * 100
 		}
 
-		local default_settings = global.zo_default_settings
+		local default_settings = storage.zo_default_settings
 		if default_settings and default_settings.default_evolution_factor then
 			default_settings.default_evolution_factor = evolution_factor
 		end
 		return
 	end
 
-	global.zo_default_settings = global.zo_default_settings or {}
-	global.zo_default_settings.default_evolution_factor = evolution_factor
+	storage.zo_default_settings = storage.zo_default_settings or {}
+	storage.zo_default_settings.default_evolution_factor = evolution_factor
 end
 
 

@@ -1,5 +1,5 @@
 ---@class ZOsurface_util
-local surface_util = {build = 3}
+local surface_util = {build = 4}
 
 
 --[[
@@ -297,10 +297,10 @@ end
 ---@param amount uint
 function surface_util.fill_box_with_resources_safely(surface, x, y, size, resource_name, amount)
 	if size > 7 then
-		local temp_surface = global.ZO_surface_for_cloning
+		local temp_surface = storage.ZO_surface_for_cloning
 		if temp_surface == nil then
 			temp_surface = game.create_surface("ZO_surface_for_cloning", {width = 1, height = 1})
-			global.ZO_surface_for_cloning = temp_surface
+			storage.ZO_surface_for_cloning = temp_surface
 		end
 		surface_util.fill_box_with_resources(surface, x, y, size, resource_name, amount)
 		tile_source_left_top.x = 0
