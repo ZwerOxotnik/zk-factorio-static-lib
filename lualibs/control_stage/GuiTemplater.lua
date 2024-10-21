@@ -319,14 +319,14 @@ GuiTemplater.buttons = {
 	check_mark_green      = {style = "frame_action_button", sprite = "utility/check_mark_green"},
 	check_mark_dark_green = {style = "frame_action_button", sprite = "utility/check_mark_dark_green"},
 	_close = {
-		sprite = "utility/close_black",
+		sprite = "utility/close_black", -- TODO: change to white
 		hovered_sprite = "utility/close_black",
 		clicked_sprite = "utility/close_black",
 		style = "frame_action_button",
 		name = script.mod_name .. "_close"
 	},
 	close = {
-		sprite = "utility/close_black",
+		sprite = "utility/close_black", -- TODO: change to white
 		hovered_sprite = "utility/close_black",
 		clicked_sprite = "utility/close_black",
 		style = "frame_action_button",
