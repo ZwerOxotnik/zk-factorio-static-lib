@@ -1,5 +1,5 @@
 ---@class ZOrichtext
-local richtext_util = {build = 1}
+local richtext_util = {build = 2}
 
 
 --[[
@@ -39,8 +39,8 @@ end
 ---@return integer?, integer?, string?, LuaItemPrototype?
 function richtext_util.find_item(text)
 	local start, _end, item_name = text:find("%[item=(.+)%]")
-	if item_name and game and game.item_prototypes then
-		return start, _end, item_name, game.item_prototypes[item_name]
+	if item_name and game and prototypes.item then
+		return start, _end, item_name, prototypes.item[item_name]
 	else
 		return start, _end, item_name
 	end
@@ -51,8 +51,8 @@ end
 ---@return integer?, integer?, string?, LuaTechnologyPrototype?
 function richtext_util.find_technology(text)
 	local start, _end, technology_name = text:find("%[technology=(.+)%]")
-	if technology_name and game and game.technology_prototypes then
-		return start, _end, technology_name, game.technology_prototypes[technology_name]
+	if technology_name and game and prototypes.technology then
+		return start, _end, technology_name, prototypes.technology[technology_name]
 	else
 		return start, _end, technology_name
 	end
@@ -63,8 +63,8 @@ end
 ---@return integer?, integer?, string?, LuaRecipePrototype?
 function richtext_util.find_recipe(text)
 	local start, _end, recipe_name = text:find("%[recipe=(.+)%]")
-	if recipe_name and game and game.recipe_prototypes then
-		return start, _end, recipe_name, game.recipe_prototypes[recipe_name]
+	if recipe_name and game and prototypes.recipe then
+		return start, _end, recipe_name, prototypes.recipe[recipe_name]
 	else
 		return start, _end, recipe_name
 	end
@@ -75,8 +75,8 @@ end
 ---@return integer?, integer?, string?, LuaGroup?
 function richtext_util.find_item_group(text)
 	local start, _end, item_group_name = text:find("%[item%-group=(.+)%]")
-	if item_group_name and game and game.item_group_prototypes then
-		return start, _end, item_group_name, game.item_group_prototypes[item_group_name]
+	if item_group_name and game and prototypes.item_group then
+		return start, _end, item_group_name, prototypes.item_group[item_group_name]
 	else
 		return start, _end, item_group_name
 	end
@@ -87,8 +87,8 @@ end
 ---@return integer?, integer?, string?, LuaFluidPrototype?
 function richtext_util.find_fluid(text)
 	local start, _end, fluid_name = text:find("%[fluid=(.+)%]")
-	if fluid_name and game and game.fluid_prototypes then
-		return start, _end, fluid_name, game.fluid_prototypes[fluid_name]
+	if fluid_name and game and prototypes.fluid then
+		return start, _end, fluid_name, prototypes.fluid[fluid_name]
 	else
 		return start, _end, fluid_name
 	end
@@ -99,8 +99,8 @@ end
 ---@return integer?, integer?, string?, LuaTilePrototype?
 function richtext_util.find_tile(text)
 	local start, _end, tile_name = text:find("%[tile=(.+)%]")
-	if tile_name and game and game.tile_prototypes then
-		return start, _end, tile_name, game.tile_prototypes[tile_name]
+	if tile_name and game and prototypes.tile then
+		return start, _end, tile_name, prototypes.tile[tile_name]
 	else
 		return start, _end, tile_name
 	end
@@ -111,8 +111,8 @@ end
 ---@return integer?, integer?, string?, LuaVirtualSignalPrototype?
 function richtext_util.find_virtual_signal(text)
 	local start, _end, signal_name = text:find("%[virtual%-signal=(.+)%]")
-	if signal_name and game and game.virtual_signal_prototypes then
-		return start, _end, signal_name, game.virtual_signal_prototypes[signal_name]
+	if signal_name and game and prototypes.virtual_signal then
+		return start, _end, signal_name, prototypes.virtual_signal[signal_name]
 	else
 		return start, _end, signal_name
 	end
@@ -123,8 +123,8 @@ end
 ---@return integer?, integer?, string?, LuaAchievementPrototype?
 function richtext_util.find_achievement(text)
 	local start, _end, achievement_name = text:find("%[achievement=(.+)%]")
-	if achievement_name and game and game.achievement_prototypes then
-		return start, _end, achievement_name, game.achievement_prototypes[achievement_name]
+	if achievement_name and game and prototypes.achievement then
+		return start, _end, achievement_name, prototypes.achievement[achievement_name]
 	else
 		return start, _end, achievement_name
 	end

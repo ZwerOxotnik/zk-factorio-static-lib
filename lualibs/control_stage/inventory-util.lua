@@ -1,5 +1,5 @@
 ---@class ZOinventory_util
-local inventory_util = {build = 2}
+local inventory_util = {build = 3}
 
 
 --[[
@@ -109,7 +109,7 @@ end
 function inventory_util.insert_items_safely(reciever, items)
 	local _, v = next(items)
 	local is_items_dictionary = (type(v) == "number")
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local insert = reciever.insert
 
 	if is_items_dictionary then
@@ -141,7 +141,7 @@ end
 function inventory_util.remove_items_safely(reciever, items)
 	local _, v = next(items)
 	local is_items_dictionary = (type(v) == "number")
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local remove = reciever.remove
 
 	if is_items_dictionary then

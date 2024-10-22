@@ -1,5 +1,5 @@
 ---@class ZOMarket_util
-local market_util = {build = 1}
+local market_util = {build = 2}
 
 
 --[[
@@ -12,23 +12,23 @@ market_util.add_offers(target, offers)
 market_util.validation_rules = {
 	---@param offer TechnologyModifier
 	["give-item"] = function(offer)
-		return (game.item_prototypes[offer.item] ~= nil)
+		return (prototypes.item[offer.item] ~= nil)
 	end,
 	---@param offer TechnologyModifier
 	["unlock-recipe"] = function(offer)
-		return (game.recipe_prototypes[offer.item] ~= nil)
+		return (prototypes.recipe[offer.item] ~= nil)
 	end,
 	---@param offer TechnologyModifier
 	["gun-speed"] = function(offer)
-		return (game.ammo_category_prototypes[offer.ammo_category] ~= nil)
+		return (prototypes.ammo_category[offer.ammo_category] ~= nil)
 	end,
 	---@param offer TechnologyModifier
 	["ammo-damage"] = function(offer)
-		return (game.ammo_category_prototypes[offer.ammo_category] ~= nil)
+		return (prototypes.ammo_category[offer.ammo_category] ~= nil)
 	end,
 	---@param offer TechnologyModifier
 	["turret-attack"] = function(offer)
-		return (game.entity_prototypes[offer.turret_id] ~= nil)
+		return (prototypes.entity[offer.turret_id] ~= nil)
 	end
 }
 
@@ -38,7 +38,7 @@ market_util.validation_rules = {
 ---@return integer # amount of added offers
 function market_util.add_offers_safely(target, offers)
 	local validation_rules = market_util.validation_rules
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local add_market_item = target.add_market_item
 	local added_amount = 0
 	for _, offer_data in pairs(offers) do
@@ -68,7 +68,7 @@ end
 ---@param offer_data Offer
 ---@return boolean # is added
 function market_util.add_offer_safely(target, offer_data)
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	local prices = offer_data.price
 	for j=1, #prices do
 		local price_data = prices[j]

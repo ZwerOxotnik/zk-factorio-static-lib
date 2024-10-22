@@ -1,5 +1,5 @@
 ---@class ZOitem_util
-local item_util = {build = 1}
+local item_util = {build = 2}
 
 
 --[[
@@ -79,7 +79,7 @@ end
 function item_util.remove_not_existing_items(items)
 	local is_SimpleItemStack = (type(items) == "table")
 
-	local item_prototypes = game.item_prototypes
+	local item_prototypes = prototypes.item
 	if is_SimpleItemStack then
 		---@cast items SimpleItemStack[]
 		for i, item in pairs(items) do

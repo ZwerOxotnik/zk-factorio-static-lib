@@ -2,7 +2,7 @@
 -- And also requires a few more tests
 
 ---@class ZOrandom_items
-local random_items = {build = 2}
+local random_items = {build = 3}
 
 
 --[[
@@ -49,7 +49,7 @@ local function check_items()
 	}
 	storage.random_items = {}
 	link_data()
-	for name, item in pairs(game.item_prototypes) do
+	for name, item in pairs(prototypes.item) do
 		if not (
 				item.has_flag("hidden")
 				or BLACKLISTED_TYPES[item.type]

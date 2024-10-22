@@ -719,7 +719,7 @@ GuiTemplater.frames = {
 	subfooter_frame = {style = "subfooter_frame"},
 	frame          = {style = "frame", direction = "horizontal"},
 	vertical_frame = {style = "frame", direction = "vertical"},
-	borderless_frame     = {style = "borderless_frame"},
+	borderless_frame     = {style = "tips_and_tricks_notification_frame"},
 	inside_shallow_frame = {style = "inside_shallow_frame", direction = "vertical"},
 	subheader_frame      = {style = "subheader_frame"},
 	subpanel_frame       = {style = "subpanel_frame"},
