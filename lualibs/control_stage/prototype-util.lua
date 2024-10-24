@@ -1,5 +1,5 @@
 ---@class ZOprototype_util
-local prototype_util = {build = 7}
+local prototype_util = {build = 8}
 
 
 --[[
@@ -40,7 +40,7 @@ function prototype_util.get_recipes_by_item_ingredient(item_name)
 		{filter = "name", name = item_name}
 	}
 
-	return game.get_filtered_recipe_prototypes{{filter = "has-ingredient-item", elem_filters = elem_filters}}
+	return prototypes.get_recipe_filtered{{filter = "has-ingredient-item", elem_filters = elem_filters}}
 end
 
 
@@ -51,7 +51,7 @@ function prototype_util.get_recipes_by_fluid_ingredient(fluid_name)
 		{filter = "name", name = fluid_name}
 	}
 
-	return game.get_filtered_recipe_prototypes{{filter = "has-ingredient-fluid", elem_filters = elem_filters}}
+	return prototypes.get_recipe_filtered{{filter = "has-ingredient-fluid", elem_filters = elem_filters}}
 end
 
 
@@ -62,7 +62,7 @@ function prototype_util.get_recipes_by_fluid_product(fluid_name)
 		{filter = "name", name = fluid_name}
 	}
 
-	return game.get_filtered_recipe_prototypes{{filter = "has-product-fluid", elem_filters = elem_filters}}
+	return prototypes.get_recipe_filtered{{filter = "has-product-fluid", elem_filters = elem_filters}}
 end
 
 
@@ -73,7 +73,7 @@ function prototype_util.get_recipes_by_item_product(item_name)
 		{filter = "name", name = item_name}
 	}
 
-	return game.get_filtered_recipe_prototypes{{filter = "has-product-item", elem_filters = elem_filters}}
+	return prototypes.get_recipe_filtered{{filter = "has-product-item", elem_filters = elem_filters}}
 end
 
 
@@ -270,7 +270,7 @@ function prototype_util.get_result_recipes_by_entity_name(entity_name)
 		{filter = "name", name = entity_name}
 	}
 
-	return game.get_filtered_recipe_prototypes{{
+	return prototypes.get_recipe_filtered{{
 		filter = "has-product-item", elem_filters = {{filter = "place-result", elem_filters = elem_filters}}
 	}}
 end
@@ -281,7 +281,7 @@ end
 function prototype_util.find_min_max_turret_range(prototypes)
 	local max_turret_range = 0
 	local min_turret_range
-	prototypes = prototypes or game.get_filtered_entity_prototypes{
+	prototypes = prototypes or prototypes.get_entity_filtered{
 		{filter="turret"}
 	}
 
@@ -304,7 +304,7 @@ end
 function prototype_util.find_biggest_chest(prototypes)
 	local result_prototype
 	local max_inventory_size = 0
-	prototypes = prototypes or game.get_filtered_entity_prototypes{
+	prototypes = prototypes or prototypes.get_entity_filtered{
 		{filter="type", type="container"}
 	}
 
@@ -330,7 +330,7 @@ end
 function prototype_util.find_smallest_chest(prototypes)
 	local result_prototype
 	local min_inventory_size
-	prototypes = prototypes or game.get_filtered_entity_prototypes{
+	prototypes = prototypes or prototypes.get_entity_filtered{
 		{filter="type", type="container"}
 	}
 

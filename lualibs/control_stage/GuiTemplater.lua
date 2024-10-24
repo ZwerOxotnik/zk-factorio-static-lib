@@ -33,7 +33,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 24}
+local GuiTemplater = {build = 25}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -1448,7 +1448,7 @@ function GuiTemplater.create_slot_button(gui, sprite_path, name)
 		button.name = name
 	end
 
-	if game.is_valid_sprite_path(sprite_path) then
+	if helpers.is_valid_sprite_path(sprite_path) then
 		button.sprite = sprite_path
 	else
 		GuiTemplater._log("Unknown sprite: " .. sprite_path, game.get_player(gui.player_index))

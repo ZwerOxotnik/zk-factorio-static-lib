@@ -1,5 +1,5 @@
 ---@class ZOrichtext
-local richtext_util = {build = 2}
+local richtext_util = {build = 3}
 
 
 --[[
@@ -27,10 +27,10 @@ richtext_util.find_color(text): start: integer?, end: integer?, r: integer?, g: 
 ---@return integer?, integer?, string?, boolean?
 function richtext_util.find_gui(text)
 	local start, _end, image_name = text:find("%[img=(.+)%]")
-	if image_name and game and game.is_valid_sprite_path then
-		return start, _end, image_name, game.is_valid_sprite_path(image_name)
+	if image_name then
+		return start, _end, image_name, helpers.is_valid_sprite_path(image_name)
 	else
-		return start, _end, image_name
+		return start, _end
 	end
 end
 

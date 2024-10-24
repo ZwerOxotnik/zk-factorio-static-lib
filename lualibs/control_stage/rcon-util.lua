@@ -1,5 +1,5 @@
 ---@class ZOrcon_util
-local rcon_util = {build = 3}
+local rcon_util = {build = 4}
 
 
 --[[
@@ -29,7 +29,7 @@ function rcon_util.expose_global_data()
 			end
 
 			if type(data) == "table" then
-				rcon.print(game.table_to_json(data))
+				rcon.print(helpers.table_to_json(data))
 			else
 				rcon.print(data)
 			end
