@@ -1,5 +1,5 @@
 ---@class ZOinventory_util
-local inventory_util = {build = 3}
+local inventory_util = {build = 4}
 
 
 --[[
@@ -85,8 +85,12 @@ function inventory_util.copy_inventory_items_to_player(source_inventory, entity)
 
 	local insert = entity_inv.insert
 	local can_insert = entity_inv.can_insert
-	local spill_item_stack = entity.surface.spill_item_stack
 	local player_position = entity.position
+	local spill_item_stack = entity.surface.spill_item_stack
+	local spill_item_stack_param = {
+		position = player_position, stack = nil,
+		enable_looted = true, allow_belts = false
+	}
 	for _, stack in pairs(source_inventory) do --TODO: recheck
 		---@cast stack LuaItemStack
 		if not stack.valid_for_read then
@@ -96,7 +100,8 @@ function inventory_util.copy_inventory_items_to_player(source_inventory, entity)
 		if can_insert(stack) then
 			insert(stack)
 		else
-			spill_item_stack(player_position, stack, true, nil, false) -- lootable, can't be spilled onto belts
+			spill_item_stack_param.stack = stack
+			spill_item_stack(spill_item_stack_param)
 		end
 		:: continue ::
 	end
