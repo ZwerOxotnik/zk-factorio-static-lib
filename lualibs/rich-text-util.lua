@@ -1,5 +1,5 @@
 ---@class ZOrichtext
-local richtext_util = {build = 3}
+local richtext_util = {build = 4}
 
 
 --[[
@@ -39,7 +39,7 @@ end
 ---@return integer?, integer?, string?, LuaItemPrototype?
 function richtext_util.find_item(text)
 	local start, _end, item_name = text:find("%[item=(.+)%]")
-	if item_name and game and prototypes.item then
+	if item_name then
 		return start, _end, item_name, prototypes.item[item_name]
 	else
 		return start, _end, item_name
@@ -51,7 +51,7 @@ end
 ---@return integer?, integer?, string?, LuaTechnologyPrototype?
 function richtext_util.find_technology(text)
 	local start, _end, technology_name = text:find("%[technology=(.+)%]")
-	if technology_name and game and prototypes.technology then
+	if technology_name then
 		return start, _end, technology_name, prototypes.technology[technology_name]
 	else
 		return start, _end, technology_name
@@ -63,7 +63,7 @@ end
 ---@return integer?, integer?, string?, LuaRecipePrototype?
 function richtext_util.find_recipe(text)
 	local start, _end, recipe_name = text:find("%[recipe=(.+)%]")
-	if recipe_name and game and prototypes.recipe then
+	if recipe_name then
 		return start, _end, recipe_name, prototypes.recipe[recipe_name]
 	else
 		return start, _end, recipe_name
@@ -75,7 +75,7 @@ end
 ---@return integer?, integer?, string?, LuaGroup?
 function richtext_util.find_item_group(text)
 	local start, _end, item_group_name = text:find("%[item%-group=(.+)%]")
-	if item_group_name and game and prototypes.item_group then
+	if item_group_name then
 		return start, _end, item_group_name, prototypes.item_group[item_group_name]
 	else
 		return start, _end, item_group_name
@@ -87,7 +87,7 @@ end
 ---@return integer?, integer?, string?, LuaFluidPrototype?
 function richtext_util.find_fluid(text)
 	local start, _end, fluid_name = text:find("%[fluid=(.+)%]")
-	if fluid_name and game and prototypes.fluid then
+	if fluid_name then
 		return start, _end, fluid_name, prototypes.fluid[fluid_name]
 	else
 		return start, _end, fluid_name
@@ -99,7 +99,7 @@ end
 ---@return integer?, integer?, string?, LuaTilePrototype?
 function richtext_util.find_tile(text)
 	local start, _end, tile_name = text:find("%[tile=(.+)%]")
-	if tile_name and game and prototypes.tile then
+	if tile_name then
 		return start, _end, tile_name, prototypes.tile[tile_name]
 	else
 		return start, _end, tile_name
@@ -111,7 +111,7 @@ end
 ---@return integer?, integer?, string?, LuaVirtualSignalPrototype?
 function richtext_util.find_virtual_signal(text)
 	local start, _end, signal_name = text:find("%[virtual%-signal=(.+)%]")
-	if signal_name and game and prototypes.virtual_signal then
+	if signal_name then
 		return start, _end, signal_name, prototypes.virtual_signal[signal_name]
 	else
 		return start, _end, signal_name
@@ -123,7 +123,7 @@ end
 ---@return integer?, integer?, string?, LuaAchievementPrototype?
 function richtext_util.find_achievement(text)
 	local start, _end, achievement_name = text:find("%[achievement=(.+)%]")
-	if achievement_name and game and prototypes.achievement then
+	if achievement_name then
 		return start, _end, achievement_name, prototypes.achievement[achievement_name]
 	else
 		return start, _end, achievement_name
@@ -176,11 +176,11 @@ end
 function richtext_util.find_train(text)
 	local start, _end, train_number = text:find("%[train=(%d+)%]")
 	train_number = tonumber(train_number)
-	if not (game and game.get_train_by_id) then
+	if not game then
 		return start, _end, train_number
 	end
 
-	local train = game.get_train_by_id(train_number)
+	local train = game.train_manager.get_train_by_id(train_number)
 	if train and not train.valid then
 		train = nil
 	end
@@ -209,10 +209,7 @@ end
 ---@return integer?, integer?, string?, LuaFontPrototype?
 function richtext_util.find_font(text)
 	local start, _end, font_name = text:find("%[font=(.+)%].*%[[%./]font%]")
-	local font
-	if game and game.font_prototypes then
-		font = game.font_prototypes[font_name]
-	end
+	local font = prototypes.font[font_name]
 	return start, _end, font_name, font
 end
 
