@@ -2,7 +2,7 @@
 -- And also requires a few more tests
 
 ---@class ZOrandom_items
-local random_items = {build = 3}
+local random_items = {build = 4}
 
 
 --[[
@@ -34,7 +34,7 @@ local function check_items()
 	}
 	local BLACKLISTED_TYPES = {
 		["deconstruction-item"] = true,
-		["spidertron-remote"] = true,
+		["rts-tool"] = true,
 		["copy-paste-tool"] = true,
 		["selection-tool"] = true,
 		["blueprint-book"] = true,
@@ -51,7 +51,7 @@ local function check_items()
 	link_data()
 	for name, item in pairs(prototypes.item) do
 		if not (
-				item.has_flag("hidden")
+				item.hidden
 				or BLACKLISTED_TYPES[item.type]
 				or BLACKLISTED_NAMES[name]
 				or name:find("creative") -- for https://mods.factorio.com/mod/creative-mode etc
