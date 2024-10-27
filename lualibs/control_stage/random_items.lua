@@ -2,7 +2,7 @@
 -- And also requires a few more tests
 
 ---@class ZOrandom_items
-local random_items = {build = 4}
+local random_items = {build = 5}
 
 
 --[[
@@ -30,7 +30,7 @@ end
 -- Finds most player items and save their names into storage.random_items
 local function check_items()
 	local BLACKLISTED_NAMES = {
-		["artillery-targeting-remote"] = true
+		-- ["artillery-targeting-remote"] = true -- TODO: recheck and fix!
 	}
 	local BLACKLISTED_TYPES = {
 		["deconstruction-item"] = true,
