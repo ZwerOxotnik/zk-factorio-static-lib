@@ -33,7 +33,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 25}
+local GuiTemplater = {build = 26}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -319,14 +319,14 @@ GuiTemplater.buttons = {
 	check_mark_green      = {style = "frame_action_button", sprite = "utility/check_mark_green"},
 	check_mark_dark_green = {style = "frame_action_button", sprite = "utility/check_mark_dark_green"},
 	_close = {
-		sprite = "utility/close_black", -- TODO: change to white
+		sprite = "utility/close",
 		hovered_sprite = "utility/close_black",
 		clicked_sprite = "utility/close_black",
 		style = "frame_action_button",
 		name = script.mod_name .. "_close"
 	},
 	close = {
-		sprite = "utility/close_black", -- TODO: change to white
+		sprite = "utility/close",
 		hovered_sprite = "utility/close_black",
 		clicked_sprite = "utility/close_black",
 		style = "frame_action_button",
