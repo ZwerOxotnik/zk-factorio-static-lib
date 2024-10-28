@@ -1,5 +1,5 @@
 ---@class ZOMarket_util
-local market_util = {build = 2}
+local market_util = {build = 3}
 
 
 --[[
@@ -44,7 +44,7 @@ function market_util.add_offers_safely(target, offers)
 	for _, offer_data in pairs(offers) do
 		local prices = offer_data.price
 		for _, price_data in pairs(prices) do
-			if item_prototypes[price_data[1] or price_data.name] == nil then
+			if item_prototypes[price_data.name] == nil then
 				goto skip
 			end
 		end
@@ -72,7 +72,7 @@ function market_util.add_offer_safely(target, offer_data)
 	local prices = offer_data.price
 	for j=1, #prices do
 		local price_data = prices[j]
-		if item_prototypes[price_data[1] or price_data.name] == nil then
+		if item_prototypes[price_data.name] == nil then
 			return false
 		end
 	end
