@@ -33,7 +33,7 @@ GuiTemplater.create_nerd_action_button40(gui: LuaGuiElement, symbol: string?, na
 ]]
 
 
-local GuiTemplater = {build = 26}
+local GuiTemplater = {build = 27}
 
 ---@type table<integer, table<string, ZOGuiTemplate.event_func>>
 GuiTemplater.events_GUIs = {
@@ -349,9 +349,9 @@ GuiTemplater.buttons = {
 		clicked_sprite = "utility/hand_black"
 	},
 	search = {
-		sprite = "utility/search_white",
-		hovered_sprite = "utility/search_black",
-		clicked_sprite = "utility/search_black"
+		sprite = "utility/search",
+		hovered_sprite = "utility/search",
+		clicked_sprite = "utility/search"
 	},
 	trash = {
 		style = "frame_action_button",
