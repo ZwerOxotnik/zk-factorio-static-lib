@@ -217,15 +217,20 @@ end
 ---@param max_research_unit_count integer?
 function force_util.research_techs_by_items(force, items, max_research_unit_count)
 	for _, tech in pairs(force.technologies) do
+		-- If this technology has no ingredients and has a research trigger, don't research it.
+		-- A technology that has a research trigger may get researched later by using research_recursive().
+		if #tech.research_unit_ingredients == 0 and tech.prototype.research_trigger ~= nil then
+			goto skip_tech
+		end
 		for _, ingredient in pairs(tech.research_unit_ingredients) do
-			if ingredient.type ~= "item" then
+			if not (ingredient.type == nil or ingredient.type == "item") then
 				goto skip_tech
 			end
 			local is_valid = false
 			local ingredient_name = ingredient.name
 			local unit_count = tech.research_unit_count
 			for _, item_name in pairs(items) do
-				if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
+				if item_name == ingredient_name and (max_research_unit_count == nil or unit_count <= max_research_unit_count) then
 					is_valid = true
 					break
 				end
@@ -234,7 +239,7 @@ function force_util.research_techs_by_items(force, items, max_research_unit_coun
 				goto skip_tech
 			end
 		end
-		tech.researched = true
+		tech.research_recursive()
 		:: skip_tech ::
 	end
 end
@@ -245,16 +250,21 @@ end
 ---@param max_research_unit_count integer?
 function force_util.research_enabled_techs_by_items(force, items, max_research_unit_count)
 	for _, tech in pairs(force.technologies) do
+		-- If this technology has no ingredients and has a research trigger, don't research it.
+		-- A technology that has a research trigger may get researched later by using research_recursive().
+		if #tech.research_unit_ingredients == 0 and tech.prototype.research_trigger ~= nil then
+			goto skip_tech
+		end
 		if tech.enabled then
 			for _, ingredient in pairs(tech.research_unit_ingredients) do
-				if ingredient.type ~= "item" then
+				if not (ingredient.type == nil or ingredient.type == "item") then
 					goto skip_tech
 				end
 				local is_valid = false
 				local ingredient_name = ingredient.name
 				local unit_count = tech.research_unit_count
 				for _, item_name in pairs(items) do
-					if item_name == ingredient_name and (max_research_unit_count == nil or unit_count < max_research_unit_count) then
+					if item_name == ingredient_name and (max_research_unit_count == nil or unit_count <= max_research_unit_count) then
 						is_valid = true
 						break
 					end
@@ -263,7 +273,7 @@ function force_util.research_enabled_techs_by_items(force, items, max_research_u
 					goto skip_tech
 				end
 			end
-			tech.researched = true
+			tech.research_recursive()
 			:: skip_tech ::
 		end
 	end
