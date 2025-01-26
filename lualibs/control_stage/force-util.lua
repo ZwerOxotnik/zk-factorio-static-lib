@@ -1,5 +1,5 @@
 ---@class ZOforce_util
-local force_util = {build = 10}
+local force_util = {build = 11}
 
 
 --[[
@@ -217,9 +217,11 @@ end
 ---@param max_research_unit_count integer?
 function force_util.research_techs_by_items(force, items, max_research_unit_count)
 	for _, tech in pairs(force.technologies) do
+		local is_research = false
 		for _, ingredient in pairs(tech.research_unit_ingredients) do
 			if ingredient.type ~= "item" then
-				goto skip_tech
+				is_research = false
+				break
 			end
 			local is_valid = false
 			local ingredient_name = ingredient.name
@@ -230,12 +232,18 @@ function force_util.research_techs_by_items(force, items, max_research_unit_coun
 					break
 				end
 			end
+
 			if not is_valid then
-				goto skip_tech
+				is_research = false
+				break
+			else
+				is_research = true
 			end
 		end
-		tech.researched = true
-		:: skip_tech ::
+
+		if is_research then
+			tech.researched = true
+		end
 	end
 end
 
@@ -246,9 +254,12 @@ end
 function force_util.research_enabled_techs_by_items(force, items, max_research_unit_count)
 	for _, tech in pairs(force.technologies) do
 		if tech.enabled then
+			local is_research = false
+
 			for _, ingredient in pairs(tech.research_unit_ingredients) do
 				if ingredient.type ~= "item" then
-					goto skip_tech
+					is_research = false
+					break
 				end
 				local is_valid = false
 				local ingredient_name = ingredient.name
@@ -259,12 +270,18 @@ function force_util.research_enabled_techs_by_items(force, items, max_research_u
 						break
 					end
 				end
+
 				if not is_valid then
-					goto skip_tech
+					is_research = false
+					break
+				else
+					is_research = true
 				end
 			end
-			tech.researched = true
-			:: skip_tech ::
+
+			if is_research then
+				tech.researched = true
+			end
 		end
 	end
 end
