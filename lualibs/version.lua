@@ -1,6 +1,6 @@
 -- Works for any stage
 ---@class ZOversion_util
-local version_util = {build = 1}
+local version_util = {build = 2}
 
 
 --[[
@@ -31,7 +31,7 @@ version_util.get_mod_version = nil
 if script and script.active_mods then
   -- For control stage
   function version_util.get_mod_version(mod_name)
-    return version_util.string_to_version(scripts.active_mods[mod_name])
+    return version_util.string_to_version(script.active_mods[mod_name])
   end
 else
   -- For data/settings stage
